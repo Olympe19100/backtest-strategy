@@ -5,6 +5,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import quantstats as qs
 from datetime import datetime, timedelta
+import tempfile
 
 # Configuration de la page Streamlit
 st.set_page_config(page_title="Olympe Financial Group - Analyse de Portefeuille", layout="wide")
@@ -96,8 +97,20 @@ if st.button("Analyser le portefeuille"):
     # Générer le rapport QuantStats
     with st.spinner("Génération du rapport d'analyse..."):
         qs.extend_pandas()
-        report = qs.reports.html(portfolio_performance.pct_change(), benchmark=benchmark_returns, output=None)
-        st.components.v1.html(report, height=600, scrolling=True)
+        
+        # Créer un fichier temporaire pour le rapport
+        with tempfile.NamedTemporaryFile(delete=False, suffix='.html') as tmpfile:
+            qs.reports.html(portfolio_performance.pct_change(), 
+                            benchmark=benchmark_returns, 
+                            output=tmpfile.name,
+                            title="Rapport d'analyse du portefeuille Olympe")
+            
+            # Lire le contenu du fichier temporaire
+            with open(tmpfile.name, 'r') as f:
+                report_content = f.read()
+        
+        # Afficher le rapport dans Streamlit
+        st.components.v1.html(report_content, height=600, scrolling=True)
 
 st.markdown("""
 ## Pourquoi choisir Olympe Financial Group ?
