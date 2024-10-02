@@ -6,8 +6,6 @@ import matplotlib.pyplot as plt
 from datetime import datetime, timedelta
 import quantstats as qs
 import tempfile
-from scipy.stats import norm
-import backtrader as bt
 
 # Configuration de la page Streamlit
 st.set_page_config(page_title="Olympe Financial Group - Votre Avenir Financier", layout="wide")
@@ -55,7 +53,7 @@ st.markdown("""
 # Fonction pour télécharger les données
 @st.cache_data
 def download_data(tickers, start_date, end_date):
-    data = yf.download(tickers + ['^FCHI'], start=start_date, end=end_date)['Adj Close']
+    data = yf.download(tickers, start=start_date, end=end_date)['Adj Close']
     return data.tz_localize(None)
 
 # Fonction pour calculer les rendements
@@ -90,60 +88,6 @@ def create_simplified_report(returns, benchmark):
     plt.tight_layout()
     return fig
 
-# Fonction pour la simulation de Monte Carlo
-def monte_carlo_simulation(returns, initial_investment, num_simulations, num_months):
-    monthly_returns = returns.resample('M').sum()
-    mean_return = monthly_returns.mean()
-    std_return = monthly_returns.std()
-    
-    simulations = np.random.normal(mean_return, std_return, (num_simulations, num_months))
-    simulated_returns = np.cumprod(1 + simulations, axis=1)
-    simulated_values = initial_investment * simulated_returns
-    
-    return simulated_values
-
-# Fonction pour calculer les probabilités avec une chaîne de Markov
-def markov_chain_probabilities(returns, num_states=5, horizon=60):
-    states = pd.qcut(returns, num_states, labels=False)
-    transition_matrix = pd.crosstab(states[:-1], states[1:], normalize='index')
-    initial_probabilities = states.value_counts(normalize=True).sort_index()
-    current_probabilities = initial_probabilities
-    for _ in range(horizon):
-        current_probabilities = current_probabilities.dot(transition_matrix)
-    return current_probabilities
-
-# Stratégie de trading pour le backtesting
-class SmaCrossStrategy(bt.Strategy):
-    params = (('fast', 10), ('slow', 30))
-
-    def __init__(self):
-        sma_fast = bt.indicators.SMA(period=self.params.fast)
-        sma_slow = bt.indicators.SMA(period=self.params.slow)
-        self.crossover = bt.indicators.CrossOver(sma_fast, sma_slow)
-
-    def next(self):
-        if not self.position:
-            if self.crossover > 0:
-                self.buy()
-        elif self.crossover < 0:
-            self.close()
-
-# Fonction pour exécuter le backtesting
-def run_backtest(data, initial_cash=100000.0):
-    cerebro = bt.Cerebro()
-    cerebro.addstrategy(SmaCrossStrategy)
-    
-    feed = bt.feeds.PandasData(dataname=data)
-    cerebro.adddata(feed)
-    
-    cerebro.broker.setcash(initial_cash)
-    cerebro.broker.setcommission(commission=0.001)
-    
-    cerebro.run()
-    
-    final_portfolio_value = cerebro.broker.getvalue()
-    return final_portfolio_value
-
 # Définition du portefeuille avec les poids spécifiés
 portfolio_weights = {
     'AAPL': 0.0076, 'MSFT': 0.1285, 'GOOG': 0.0168, 'AMZN': 0.0174, 'META': 0.0526,
@@ -153,19 +97,18 @@ portfolio_weights = {
 }
 
 # En-tête
-st.title("Olympe Financial Group - Votre Partenaire pour un Avenir Financier Brillant")
+st.title("Olympe Financial Group - Façonnez Votre Avenir Financier")
 
 st.markdown("""
 <div class="highlight">
-    <h2>Découvrez le Pouvoir de l'Analyse Financière Globale</h2>
-    <p>Chez Olympe Financial Group, nous faisons ce que personne d'autre ne fait : nous analysons quotidiennement chaque société cotée en bourse dans le monde. Oui, vous avez bien lu - chaque société, chaque jour !</p>
-    <p>Imaginez avoir accès à cette puissance d'analyse pour votre portefeuille. C'est exactement ce que nous vous offrons !</p>
+    <h2>Expertise Financière à Votre Service</h2>
+    <p>Chez Olympe Financial Group, nous combinons expertise financière de pointe et solutions personnalisées pour vous offrir le meilleur. Notre engagement envers l'excellence se traduit par des résultats tangibles et durables pour votre patrimoine.</p>
 </div>
 """, unsafe_allow_html=True)
 
 # Section d'analyse de portefeuille
-st.header("Votre Portefeuille, Notre Priorité")
-st.write("Prêt à voir la magie opérer sur vos investissements ? C'est parti !")
+st.header("Analyse de Portefeuille Personnalisée")
+st.write("Découvrez la puissance de notre analyse financière approfondie. Commencez dès maintenant !")
 
 col1, col2 = st.columns(2)
 with col1:
@@ -173,14 +116,11 @@ with col1:
 with col2:
     end_date = st.date_input("Date de fin", value=datetime(2024, 9, 30))
 
-initial_investment = st.number_input("Montant initial de l'investissement (€)", min_value=1000, value=100000, step=1000)
-
-if st.button("Révélez le Potentiel de Mon Portefeuille"):
+if st.button("Analyser Mon Portefeuille"):
     with st.spinner("Analyse en cours... Nous préparons votre rapport personnalisé."):
         # Télécharger les données
-        all_data = download_data(list(portfolio_weights.keys()), start_date, end_date)
-        portfolio_data = all_data.drop('^FCHI', axis=1)
-        benchmark_data = all_data['^FCHI']
+        portfolio_data = download_data(list(portfolio_weights.keys()), start_date, end_date)
+        benchmark_data = download_data('^FCHI', start_date, end_date)  # CAC 40
 
         # Calculer les rendements
         portfolio_returns = calculate_returns(portfolio_data)
@@ -192,9 +132,10 @@ if st.button("Révélez le Potentiel de Mon Portefeuille"):
 
         # Générer le rapport
         try:
+            # Essayer d'utiliser qs.reports.html()
             with tempfile.NamedTemporaryFile(delete=False, suffix='.html') as tmpfile:
                 qs.reports.html(weighted_returns, 
-                                benchmark=benchmark_returns, 
+                                benchmark=benchmark_returns.squeeze(), 
                                 output=tmpfile.name,
                                 title="Rapport d'analyse du portefeuille Olympe")
                 
@@ -205,137 +146,80 @@ if st.button("Révélez le Potentiel de Mon Portefeuille"):
         
         except Exception as e:
             st.warning("Nous préparons un rapport simplifié pour vous offrir les meilleures insights.")
-            fig = create_simplified_report(weighted_returns, benchmark_returns)
+            
+            # Créer et afficher un rapport simplifié
+            fig = create_simplified_report(weighted_returns, benchmark_returns.squeeze())
             st.pyplot(fig)
 
-        # Simulation de Monte Carlo
-        num_simulations = 1000
-        num_months = 60  # 5 ans
-        simulated_values = monte_carlo_simulation(weighted_returns, initial_investment, num_simulations, num_months)
-
-        st.subheader("Simulation de Monte Carlo sur 5 ans")
-        fig, ax = plt.subplots(figsize=(10, 6))
-        ax.plot(simulated_values.T, alpha=0.1, color='blue')
-        ax.plot(simulated_values.mean(axis=0), color='red', linewidth=2, label='Moyenne')
-        ax.fill_between(range(num_months), 
-                        np.percentile(simulated_values, 10, axis=0),
-                        np.percentile(simulated_values, 90, axis=0),
-                        alpha=0.2, color='blue', label='Intervalle de confiance 80%')
-        ax.set_xlabel('Mois')
-        ax.set_ylabel('Valeur du portefeuille (€)')
-        ax.set_title(f'Simulation de Monte Carlo pour un investissement initial de {initial_investment:,}€')
-        ax.legend()
-        st.pyplot(fig)
-
-        # Statistiques de la simulation
-        final_values = simulated_values[:, -1]
-        st.write(f"Valeur moyenne estimée après 5 ans: {final_values.mean():,.2f}€")
-        st.write(f"Valeur médiane estimée après 5 ans: {np.median(final_values):,.2f}€")
-        st.write(f"10e percentile: {np.percentile(final_values, 10):,.2f}€")
-        st.write(f"90e percentile: {np.percentile(final_values, 90):,.2f}€")
-
-        # Analyse des probabilités par chaîne de Markov
-        st.subheader("Analyse des Probabilités par Chaîne de Markov")
-        markov_probs = markov_chain_probabilities(weighted_returns)
-        fig, ax = plt.subplots(figsize=(10, 6))
-        markov_probs.plot(kind='bar', ax=ax)
-        ax.set_title("Probabilités des États de Rendement après 5 ans")
-        ax.set_xlabel("État de Rendement")
-        ax.set_ylabel("Probabilité")
-        st.pyplot(fig)
-
-        st.write("Interprétation des États de Rendement:")
-        st.write("- État 0: Rendements les plus faibles")
-        st.write("- État 4: Rendements les plus élevés")
-        st.write(f"Probabilité d'obtenir des rendements élevés (État 3 ou 4): {markov_probs.iloc[-2:].sum():.2%}")
-
-        # Backtesting
-        st.subheader("Résultats du Backtesting")
-        backtest_result = run_backtest(portfolio_data, initial_investment)
-        st.write(f"Valeur finale du portefeuille après backtesting: {backtest_result:,.2f}€")
-        performance = (backtest_result - initial_investment) / initial_investment
-        st.write(f"Performance de la stratégie: {performance:.2%}")
-
-    st.success("Fantastique ! Voici ce que notre analyse révèle sur votre portefeuille. Préparez-vous à être impressionné !")
+    st.success("Analyse complétée avec succès ! Voici les résultats de votre portefeuille personnalisé.")
 
 # Section "Pourquoi Nous Choisir"
-st.header("Pourquoi Olympe Financial Group est Votre Meilleur Choix")
+st.header("Pourquoi Choisir Olympe Financial Group ?")
 col1, col2 = st.columns(2)
 with col1:
     st.markdown("""
-    - **Analyse Mondiale Inégalée** : Nous scrutons chaque action, chaque jour, pour vous offrir les meilleures opportunités.
-    - **Stratégies Sur Mesure** : Votre succès est unique, tout comme nos solutions pour vous.
+    - **Expertise Financière Approfondie**: Nos experts utilisent des techniques d'analyse de pointe pour optimiser vos investissements.
+    - **Solutions Patrimoniales Sur Mesure**: Stratégies personnalisées adaptées à vos objectifs et votre profil de risque.
     """)
 with col2:
     st.markdown("""
-    - **Protection Intelligente** : Nos algorithmes veillent sur votre argent 24/7, même quand vous dormez.
-    - **Optimisation Fiscale Astucieuse** : Gardez plus d'argent dans vos poches, légalement et intelligemment.
+    - **Gestion Proactive des Risques**: Notre approche innovante a permis à nos clients de limiter leurs pertes, même dans des conditions de marché difficiles.
+    - **Optimisation Fiscale**: Nous identifions les opportunités pour maximiser la valeur de votre patrimoine.
     """)
 
-# Section sur les performances avancées
+# Nouvelle section sur les performances avancées
 st.markdown("""
 <div class="performance-section">
-    <h2>Notre Secret : La Gestion de Risque à la Pointe de la Technologie</h2>
-    <p>Vous vous demandez comment nous transformons des données en or ? Laissez-nous vous montrer comment notre technologie travaille dur pour votre argent.</p>
+    <h2>Nos Performances de Pointe en Gestion de Risque</h2>
+    <p>Découvrez comment nos algorithmes avancés ne se contentent pas seulement de choisir les meilleurs actifs, mais gèrent activement le risque pour optimiser vos rendements.</p>
 </div>
 """, unsafe_allow_html=True)
 
-# Charger et afficher le rapport de performance
+# Charger et afficher le deuxième rapport HTML
 with open('rapport_performance (24).html', 'r') as f:
     risk_management_report = f.read()
 
 st.components.v1.html(risk_management_report, height=600, scrolling=True)
 
 st.markdown("""
-st.markdown("""
 <div class="highlight">
-    <h3>Ce Que Notre Technologie Signifie Pour Vous :</h3>
+    <h3>Ce que notre Gestion de Risque Avancée signifie pour vous :</h3>
     <ul>
-        <li>Dormez sur vos deux oreilles : nous réduisons les montagnes russes financières</li>
-        <li>Un bouclier contre les tempêtes du marché : votre argent est protégé</li>
-        <li>Le meilleur des deux mondes : plus de gains, moins de risques</li>
-        <li>Toujours un coup d'avance : nous nous adaptons plus vite que le marché change</li>
+        <li>Réduction significative de la volatilité du portefeuille</li>
+        <li>Protection accrue contre les baisses de marché</li>
+        <li>Optimisation du ratio rendement/risque</li>
+        <li>Adaptation dynamique aux conditions changeantes du marché</li>
     </ul>
-    <p>En 2022, quand d'autres perdaient gros, nos clients souriaient. Pourquoi ? Notre technologie avait prévu la tempête et protégé leur argent.</p>
+    <p>En 2022, alors que de nombreux investisseurs subissaient des pertes importantes, nos clients ont bénéficié de notre gestion de risque proactive, limitant considérablement l'impact des turbulences du marché.</p>
 </div>
 """, unsafe_allow_html=True)
 
 # Témoignages
-st.header("Ce Que Nos Clients Heureux Racontent")
+st.header("Ce Que Disent Nos Clients")
 col1, col2 = st.columns(2)
 with col1:
     st.markdown("""
-    > "Avec Olympe, mon argent travaille plus intelligemment. Je n'ai jamais été aussi serein financièrement." - Sophie D., Entrepreneur
+    > "Grâce à Olympe Financial Group, j'ai pu optimiser mon portefeuille et atteindre mes objectifs financiers plus rapidement que je ne l'aurais imaginé." - Sophie D., Entrepreneur
     """)
 with col2:
     st.markdown("""
-    > "Ces gens sont des magiciens de la finance ! Mon portefeuille n'a jamais été aussi performant." - Marc L., Cadre Supérieur
+    > "L'expertise et le professionnalisme de l'équipe Olympe ont complètement transformé ma vision de la gestion patrimoniale." - Marc L., Cadre Supérieur
     """)
 
 # Appel à l'action
 st.markdown("""
 <div class="highlight">
-    <h3>Prêt à Rejoindre le Club des Investisseurs Gagnants ?</h3>
-    <p>Ne laissez pas votre argent dormir. Chez Olympe, nous le faisons danser au rythme des marchés mondiaux. Contactez-nous maintenant et voyez la différence par vous-même !</p>
+    <h3>Prêt à Sécuriser Votre Avenir Financier ?</h3>
+    <p>Ne laissez pas passer cette opportunité de transformer votre situation financière. Contactez-nous dès aujourd'hui pour une consultation gratuite et personnalisée.</p>
 </div>
 """, unsafe_allow_html=True)
 
 # Information de contact
 st.markdown("""
 <div class="contact-info">
-    <h3>Parlons de Votre Avenir Financier</h3>
-    <p>📞 Un coup de fil pour un avenir brillant : +33 7 81 71 44 43</p>
-    <p>📧 Un email pour des opportunités infinies : contact@olympemanagement.com</p>
-    <p>Olympe Financial Group : Où Votre Argent Devient Un Super-Héros</p>
+    <h3>Contactez Olympe Financial Group</h3>
+    <p>📞 Téléphone : +33 7 81 71 44 43</p>
+    <p>📧 Email : contact@olympemanagement.com</p>
+    <p>Expertise financière et solutions patrimoniales sur mesure.</p>
 </div>
 """, unsafe_allow_html=True)
-
-if st.button("Je Veux Mon Plan Financier Personnalisé"):
-    st.success("Excellente décision ! Nous avons hâte de vous montrer comment nous pouvons faire briller votre avenir financier. Attendez-vous à un appel de notre équipe d'experts très bientôt !")
-
-# Pied de page
-st.markdown("""
----
-<p style='text-align: center; color: gray;'>© 2024 Olympe Financial Group. Tous droits réservés.</p>
-""", unsafe_allow_html=True)
-
