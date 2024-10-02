@@ -100,9 +100,25 @@ if st.button("Analyser le portefeuille"):
 
     # Calculer les métriques avec QuantStats
     qs.extend_pandas()
+    
+    # Assurez-vous que portfolio_returns est une série
+    if isinstance(portfolio_returns, pd.DataFrame):
+        portfolio_returns = portfolio_returns.iloc[:, 0]
+    
+    # Nettoyage des données
+    portfolio_returns = portfolio_returns.dropna().replace([np.inf, -np.inf], np.nan).dropna()
+    benchmark_returns = benchmark_returns.dropna().replace([np.inf, -np.inf], np.nan).dropna()
+    
+    # Alignement des index
+    common_index = portfolio_returns.index.intersection(benchmark_returns.index)
+    portfolio_returns = portfolio_returns.loc[common_index]
+    benchmark_returns = benchmark_returns.loc[common_index]
+    
+    # Calcul des métriques
     metrics = qs.reports.metrics(portfolio_returns, benchmark_returns, mode='full')
 
     # Afficher les métriques principales
+    st.markdown("## Métriques principales")
     col1, col2, col3 = st.columns(3)
     with col1:
         st.markdown("<p class='metric-label'>Rendement total</p>", unsafe_allow_html=True)
