@@ -224,5 +224,3 @@ st.markdown("""
 </div>
 """, unsafe_allow_html=True)
 
-if st.button("Demander une Consultation"):
-    st.success("Merci de votre intérêt ! Nous vous contacterons sous peu pour discuter de comment notre expertise en gestion de risque peut optimiser votre portefeuille.")
