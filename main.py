@@ -3,8 +3,8 @@ import yfinance as yf
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
+import quantstats as qs
 from datetime import datetime, timedelta
-import pyfolio as pf
 
 # Configuration de la page Streamlit
 st.set_page_config(page_title="Olympe Financial Group - Analyse de Portefeuille", layout="wide")
@@ -18,6 +18,13 @@ def download_data(tickers, start_date, end_date):
 # Fonction pour calculer les rendements
 def calculate_returns(prices):
     return prices.pct_change().dropna()
+
+# Fonction pour calculer la performance du portefeuille
+def calculate_portfolio_performance(returns, weights, initial_investment=100000):
+    weighted_returns = returns.mul(weights, axis=1).sum(axis=1)
+    cumulative_returns = (1 + weighted_returns).cumprod()
+    portfolio_value = initial_investment * cumulative_returns
+    return portfolio_value
 
 # Définition du portefeuille avec les poids spécifiés
 portfolio_weights = {
@@ -67,23 +74,52 @@ if st.button("Analyser le portefeuille"):
     portfolio_returns = calculate_returns(portfolio_data)
     benchmark_returns = calculate_returns(benchmark_data)
 
-    # Calculer les rendements pondérés du portefeuille
-    weights_series = pd.Series(portfolio_weights)
-    weighted_returns = (portfolio_returns * weights_series).sum(axis=1)
+    # Ajuster les poids
+    weights_series = pd.Series(portfolio_weights).reindex(portfolio_returns.columns).dropna()
+    weights_series = weights_series / weights_series.sum()
 
-    # Calculer les métriques avec pyfolio
-    perf_stats = pf.timeseries.perf_stats(weighted_returns)
-    benchmark_stats = pf.timeseries.perf_stats(benchmark_returns)
+    # Calculer la performance
+    portfolio_performance = calculate_portfolio_performance(portfolio_returns, weights_series)
+    benchmark_performance = (1 + benchmark_returns).cumprod() * 100000
+
+    # Calculer les rendements du portefeuille
+    portfolio_returns_series = portfolio_returns.mul(weights_series, axis=1).sum(axis=1)
+
+    # Utiliser Quantstats pour calculer les métriques
+    qs_stats = qs.reports.metrics(portfolio_returns_series, benchmark_returns, mode='full')
+
+    # Afficher les métriques principales
+    st.markdown("## Métriques principales")
+    col1, col2, col3 = st.columns(3)
+    with col1:
+        st.markdown("<p class='metric-label'>Rendement total</p>", unsafe_allow_html=True)
+        st.markdown(f"<p class='metric-value'>{qs_stats['Total Return']:.2%}</p>", unsafe_allow_html=True)
+    with col2:
+        st.markdown("<p class='metric-label'>CAGR</p>", unsafe_allow_html=True)
+        st.markdown(f"<p class='metric-value'>{qs_stats['CAGR']:.2%}</p>", unsafe_allow_html=True)
+    with col3:
+        st.markdown("<p class='metric-label'>Ratio de Sharpe</p>", unsafe_allow_html=True)
+        st.markdown(f"<p class='metric-value'>{qs_stats['Sharpe']:.2f}</p>", unsafe_allow_html=True)
+
+    # Afficher d'autres métriques importantes
+    st.markdown("## Métriques détaillées")
+    col1, col2 = st.columns(2)
+    with col1:
+        st.metric("Volatilité annualisée", f"{qs_stats['Volatility (ann.)']:.2%}")
+        st.metric("Max Drawdown", f"{qs_stats['Max Drawdown']:.2%}")
+        st.metric("Ratio de Sortino", f"{qs_stats['Sortino']:.2f}")
+    with col2:
+        st.metric("Alpha", f"{qs_stats['Alpha']:.2%}")
+        st.metric("Beta", f"{qs_stats['Beta']:.2f}")
+        st.metric("Ratio d'information", f"{qs_stats['Information Ratio']:.2f}")
 
     # Visualisation des performances
     fig, ax = plt.subplots(figsize=(12, 6))
-    cumulative_returns = (1 + weighted_returns).cumprod()
-    cumulative_benchmark = (1 + benchmark_returns).cumprod()
-    ax.plot(cumulative_returns.index, cumulative_returns, label='Portefeuille Olympe', color='#1E3A8A')
-    ax.plot(cumulative_benchmark.index, cumulative_benchmark, label='CAC 40', color='#9CA3AF')
+    ax.plot(portfolio_performance.index, portfolio_performance, label='Portefeuille Olympe', color='#1E3A8A')
+    ax.plot(benchmark_performance.index, benchmark_performance, label='CAC 40', color='#9CA3AF')
     ax.set_title('Comparaison des performances', fontweight='bold', fontsize=16)
     ax.set_xlabel('Date')
-    ax.set_ylabel('Rendement cumulatif')
+    ax.set_ylabel('Valeur du portefeuille (€)')
     ax.legend()
     ax.grid(True, linestyle='--', alpha=0.7)
     ax.set_facecolor('#F3F4F6')
@@ -93,34 +129,9 @@ if st.button("Analyser le portefeuille"):
     
     st.pyplot(fig)
 
-    # Afficher les métriques principales
-    st.markdown("## Métriques principales")
-    col1, col2, col3 = st.columns(3)
-    with col1:
-        st.markdown("<p class='metric-label'>Rendement annualisé</p>", unsafe_allow_html=True)
-        st.markdown(f"<p class='metric-value'>{perf_stats['Annual return']:.2%}</p>", unsafe_allow_html=True)
-    with col2:
-        st.markdown("<p class='metric-label'>Ratio de Sharpe</p>", unsafe_allow_html=True)
-        st.markdown(f"<p class='metric-value'>{perf_stats['Sharpe ratio']:.2f}</p>", unsafe_allow_html=True)
-    with col3:
-        st.markdown("<p class='metric-label'>Volatilité annualisée</p>", unsafe_allow_html=True)
-        st.markdown(f"<p class='metric-value'>{perf_stats['Annual volatility']:.2%}</p>", unsafe_allow_html=True)
-
-    # Afficher d'autres métriques importantes
-    st.markdown("## Métriques détaillées")
-    col1, col2 = st.columns(2)
-    with col1:
-        st.metric("Max Drawdown", f"{perf_stats['Max drawdown']:.2%}")
-        st.metric("Ratio de Sortino", f"{perf_stats['Sortino ratio']:.2f}")
-    with col2:
-        st.metric("Ratio de Calmar", f"{perf_stats['Calmar ratio']:.2f}")
-        st.metric("Ratio d'information", f"{perf_stats['Information ratio']:.2f}")
-
     # Afficher un tableau comparatif
-    st.markdown("## Comparaison avec le benchmark")
-    comparison_df = pd.concat([perf_stats, benchmark_stats], axis=1)
-    comparison_df.columns = ['Portefeuille Olympe', 'Benchmark (CAC 40)']
-    st.table(comparison_df)
+    st.markdown("## Comparaison détaillée avec le benchmark")
+    st.dataframe(qs_stats)
 
 # Contenu inspiré de la plaquette commerciale
 st.markdown("""
