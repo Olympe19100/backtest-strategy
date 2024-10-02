@@ -201,13 +201,39 @@ st.markdown("""
 # Témoignages
 st.header("Ce Que Disent Nos Clients")
 col1, col2 = st.columns(2)
+
 with col1:
     st.markdown("""
-    > "Grâce à Olympe Financial Group, j'ai pu optimiser mon portefeuille et atteindre mes objectifs financiers plus rapidement que je ne l'aurais imaginé." - Sophie D., Entrepreneur
+    > "Olympe Financial Group a su déployer des stratégies financières sophistiquées qui m'ont permis de maximiser mes rendements tout en maintenant un contrôle strict sur les risques. Leur expertise en analyse quantitative est incomparable." - Antoine L., Gérant de Fonds
     """)
+    st.markdown("""
+    > "En tant que chef d'une PME, j'avais besoin d'une gestion sur mesure pour mon entreprise et mon patrimoine personnel. L'équipe d'Optimiz m'a offert un service clé en main, couvrant tous les aspects juridiques, financiers et fiscaux. Un vrai partenaire de confiance." - Karine P., Directrice d'une PME
+    """)
+    st.markdown("""
+    > "Grâce à Olympe, j'ai pu prendre des décisions éclairées en temps de marché incertain. Leur approche rigoureuse m'a permis d'éviter des pertes majeures et de saisir des opportunités rares." - Jérôme C., Consultant Indépendant
+    """)
+    st.markdown("""
+    > "Le soutien d'Olympe Financial Group dans la gestion de mes investissements a été remarquable. Leur capacité à ajuster la stratégie en fonction des fluctuations du marché tout en assurant un rendement optimal m'a impressionné." - Isabelle R., Particulière
+    """)
+    st.markdown("""
+    > "Optimiz m'a accompagné dans la structuration de mon entreprise familiale. Leur approche patrimoniale m'a aidé à planifier efficacement la transmission de mes actifs tout en optimisant la fiscalité." - Étienne G., Entrepreneur Familial
+    """)
+
 with col2:
     st.markdown("""
-    > "L'expertise et le professionnalisme de l'équipe Olympe ont complètement transformé ma vision de la gestion patrimoniale." - Marc L., Cadre Supérieur
+    > "Ce qui distingue Olympe, c'est leur maîtrise des algorithmes d'analyse financière. En tant qu'investisseur privé, j'ai vu mes rendements nettement améliorés grâce à leur gestion quantitative et leur contrôle des risques." - Marie T., Investisseuse Privée
+    """)
+    st.markdown("""
+    > "Optimiz a non seulement optimisé la gestion de mon patrimoine, mais ils m'ont aussi aidé à structurer mes actifs pour mieux protéger ma famille. Leur expertise juridique et patrimoniale est un véritable atout." - Fabien D., Cadre Supérieur
+    """)
+    st.markdown("""
+    > "Olympe Financial Group m'a donné une perspective nouvelle sur la gestion des risques. Ils ont su mettre en place une stratégie d'investissement solide qui a stabilisé mes rendements dans un contexte de marché turbulent." - Lucien M., Gérant de Portefeuille
+    """)
+    st.markdown("""
+    > "En tant que particulier avec un portefeuille modeste, je pensais ne pas avoir accès à des conseils de haute qualité. Olympe a su adapter ses services à mes besoins tout en me faisant bénéficier de leur expertise en analyse financière avancée." - Clara B., Particulière
+    """)
+    st.markdown("""
+    > "Olympe et Optimiz m'ont accompagné dans le développement international de mon entreprise. Grâce à leur expertise combinée en gestion financière et en structuration juridique, j'ai pu franchir ce cap sereinement." - Samuel N., CEO d'une Start-up Technologique
     """)
 
 # Appel à l'action
