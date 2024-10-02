@@ -176,7 +176,7 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 # Charger et afficher le deuxième rapport HTML
-with open('chemin/vers/votre/rapport_gestion_risque.html', 'r') as f:
+with open('rapport_performance (24).html', 'r') as f:
     risk_management_report = f.read()
 
 st.components.v1.html(risk_management_report, height=600, scrolling=True)
