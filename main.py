@@ -50,6 +50,9 @@ st.markdown("""
 </style>
 """, unsafe_allow_html=True)
 
+logo = "Olympe Financial group.svg"  # Remplacez par le chemin d'accès à votre logo
+st.image(logo, width=200)  
+
 # Fonction pour télécharger les données
 @st.cache_data
 def download_data(tickers, start_date, end_date):
