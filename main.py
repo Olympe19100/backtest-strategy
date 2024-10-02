@@ -225,5 +225,5 @@ st.markdown("""
     <p>📧 Email : contact@olympemanagement.com</p>
     <p>Expertise financière et solutions patrimoniales sur mesure.</p>
 </div>
-""", unsafe_allow_html=True) je voudrais rajouter mon logo en haut de page  IL FAUT FAIRE ATTENTION CAR la page html qui se créer au fure et à mesure ne marche plus 
+""", unsafe_allow_html=True)
 
