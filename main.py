@@ -204,7 +204,7 @@ col1, col2 = st.columns(2)
 
 with col1:
     st.markdown("""
-    > "Olympe Financial Group a su déployer des stratégies financières sophistiquées qui m'ont permis de maximiser mes rendements tout en maintenant un contrôle strict sur les risques. Leur expertise en analyse quantitative est incomparable." - Antoine L., Gérant de Fonds
+    > "Olympe Financial Group a su déployer des stratégies financières sophistiquées qui m'ont permis de maximiser mes rendements tout en maintenant un contrôle strict sur les risques. Leur expertise en analyse quantitative est un atout ." - Antoine L., Gérant de Fonds
     """)
     st.markdown("""
     > "En tant que chef d'une PME, j'avais besoin d'une gestion sur mesure pour mon entreprise et mon patrimoine personnel. L'équipe d'Optimiz m'a offert un service clé en main, couvrant tous les aspects juridiques, financiers et fiscaux. Un vrai partenaire de confiance." - Karine P., Directrice d'une PME
