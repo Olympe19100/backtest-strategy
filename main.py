@@ -52,35 +52,48 @@ if st.button("Analyser le portefeuille"):
     weights_series = pd.Series(portfolio_weights)
     weighted_returns = (portfolio_returns * weights_series).sum(axis=1)
 
-    # Générer le rapport QuantStats
-    with st.spinner("Génération du rapport d'analyse..."):
-        qs.extend_pandas()
-        
-        # Créer un fichier temporaire pour le rapport
-        with tempfile.NamedTemporaryFile(delete=False, suffix='.html') as tmpfile:
-            qs.reports.html(weighted_returns, 
-                            benchmark=benchmark_returns, 
-                            output=tmpfile.name,
-                            title="Rapport d'analyse du portefeuille Olympe")
+    # Vérifier que les données sont dans le bon format
+    if not isinstance(weighted_returns.index, pd.DatetimeIndex):
+        st.error("Les données de rendement ne sont pas dans le format attendu. Veuillez vérifier vos données.")
+    else:
+        # Générer le rapport QuantStats
+        with st.spinner("Génération du rapport d'analyse..."):
+            qs.extend_pandas()
             
-            # Lire le contenu du fichier temporaire
-            with open(tmpfile.name, 'r') as f:
-                report_content = f.read()
-        
-        # Afficher le rapport dans Streamlit
-        st.components.v1.html(report_content, height=600, scrolling=True)
+            try:
+                # Créer un fichier temporaire pour le rapport
+                with tempfile.NamedTemporaryFile(delete=False, suffix='.html') as tmpfile:
+                    qs.reports.html(weighted_returns, 
+                                    benchmark=benchmark_returns, 
+                                    output=tmpfile.name,
+                                    title="Rapport d'analyse du portefeuille Olympe")
+                    
+                    # Lire le contenu du fichier temporaire
+                    with open(tmpfile.name, 'r') as f:
+                        report_content = f.read()
+                
+                # Afficher le rapport dans Streamlit
+                st.components.v1.html(report_content, height=600, scrolling=True)
 
-    # Afficher quelques métriques clés
-    metrics = qs.reports.metrics(weighted_returns, benchmark_returns, mode='full')
-    
-    st.subheader("Métriques clés")
-    col1, col2, col3 = st.columns(3)
-    with col1:
-        st.metric("Rendement total", f"{metrics['Total Return'][0]:.2%}")
-    with col2:
-        st.metric("Ratio de Sharpe", f"{metrics['Sharpe'][0]:.2f}")
-    with col3:
-        st.metric("Max Drawdown", f"{metrics['Max Drawdown'][0]:.2%}")
+                # Afficher quelques métriques clés
+                metrics = qs.reports.metrics(weighted_returns, benchmark_returns, mode='full')
+                
+                st.subheader("Métriques clés")
+                col1, col2, col3 = st.columns(3)
+                with col1:
+                    st.metric("Rendement total", f"{metrics['Total Return'][0]:.2%}")
+                with col2:
+                    st.metric("Ratio de Sharpe", f"{metrics['Sharpe'][0]:.2f}")
+                with col3:
+                    st.metric("Max Drawdown", f"{metrics['Max Drawdown'][0]:.2%}")
+            
+            except Exception as e:
+                st.error(f"Une erreur s'est produite lors de la génération du rapport: {str(e)}")
+                st.write("Détails des données:")
+                st.write(f"Forme des rendements pondérés: {weighted_returns.shape}")
+                st.write(f"Type d'index: {type(weighted_returns.index)}")
+                st.write(f"Premières lignes des rendements pondérés:")
+                st.write(weighted_returns.head())
 
 # Contenu inspiré de la plaquette commerciale
 st.markdown("""
