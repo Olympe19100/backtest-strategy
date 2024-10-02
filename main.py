@@ -17,9 +17,6 @@ st.markdown("""
         background-color: white;
         color: black;
     }
-    .stSidebar {
-        background-color: #f0f2f6;
-    }
     h1, h2, h3 {
         color: #1E3A8A;
     }
@@ -37,20 +34,11 @@ st.markdown("""
         border-radius: 5px;
         margin-bottom: 20px;
     }
-    .metric-card {
+    .contact-info {
         background-color: #F0F4FF;
         padding: 15px;
         border-radius: 5px;
-        text-align: center;
-    }
-    .metric-value {
-        font-size: 24px;
-        font-weight: bold;
-        color: #1E3A8A;
-    }
-    .metric-label {
-        font-size: 16px;
-        color: #4B5563;
+        margin-top: 20px;
     }
 </style>
 """, unsafe_allow_html=True)
@@ -156,33 +144,6 @@ if st.button("Analyser Mon Portefeuille"):
             fig = create_simplified_report(weighted_returns, benchmark_returns.squeeze())
             st.pyplot(fig)
 
-        # Afficher quelques métriques clés
-        metrics = qs.reports.metrics(weighted_returns, benchmark_returns.squeeze(), mode='full')
-        
-        st.subheader("Vos Métriques Clés")
-        col1, col2, col3 = st.columns(3)
-        with col1:
-            st.markdown(f"""
-            <div class="metric-card">
-                <p class="metric-value">{metrics['Total Return'][0]:.2%}</p>
-                <p class="metric-label">Rendement Total</p>
-            </div>
-            """, unsafe_allow_html=True)
-        with col2:
-            st.markdown(f"""
-            <div class="metric-card">
-                <p class="metric-value">{metrics['Sharpe'][0]:.2f}</p>
-                <p class="metric-label">Ratio de Sharpe</p>
-            </div>
-            """, unsafe_allow_html=True)
-        with col3:
-            st.markdown(f"""
-            <div class="metric-card">
-                <p class="metric-value">{metrics['Max Drawdown'][0]:.2%}</p>
-                <p class="metric-label">Drawdown Maximum</p>
-            </div>
-            """, unsafe_allow_html=True)
-
     st.success("Analyse complétée avec succès ! Voici les résultats de votre portefeuille personnalisé.")
 
 # Section "Pourquoi Nous Choisir"
@@ -199,15 +160,6 @@ with col2:
     - **Optimisation Fiscale**: Nous identifions les opportunités pour maximiser la valeur de votre patrimoine.
     """)
 
-# Appel à l'action
-st.markdown("""
-<div class="highlight">
-    <h3>Prêt à Sécuriser Votre Avenir Financier ?</h3>
-    <p>Ne laissez pas passer cette opportunité de transformer votre situation financière. Contactez-nous dès aujourd'hui pour une consultation gratuite et personnalisée.</p>
-    <p>📞 +33 7 81 71 44 43 | 📧 contact@olympemanagement.com</p>
-</div>
-""", unsafe_allow_html=True)
-
 # Témoignages (fictifs pour l'exemple)
 st.header("Ce Que Disent Nos Clients")
 col1, col2 = st.columns(2)
@@ -220,12 +172,23 @@ with col2:
     > "L'expertise et le professionnalisme de l'équipe Olympe ont complètement transformé ma vision de la gestion patrimoniale." - Marc L., Cadre Supérieur
     """)
 
-# Sidebar
-st.sidebar.image("https://example.com/olympe_logo.png", use_column_width=True)
-st.sidebar.title("Olympe Financial Group")
-st.sidebar.info("Expertise financière et solutions patrimoniales sur mesure.")
-if st.sidebar.button("Demander une Consultation"):
-    st.sidebar.success("Merci de votre intérêt ! Nous vous contacterons sous peu.")
-st.sidebar.markdown("---")
-st.sidebar.text("Contact : +33 7 81 71 44 43")
-st.sidebar.text("Email : contact@olympemanagement.com")
+# Appel à l'action
+st.markdown("""
+<div class="highlight">
+    <h3>Prêt à Sécuriser Votre Avenir Financier ?</h3>
+    <p>Ne laissez pas passer cette opportunité de transformer votre situation financière. Contactez-nous dès aujourd'hui pour une consultation gratuite et personnalisée.</p>
+</div>
+""", unsafe_allow_html=True)
+
+# Information de contact (anciennement dans la sidebar)
+st.markdown("""
+<div class="contact-info">
+    <h3>Contactez Olympe Financial Group</h3>
+    <p>📞 Téléphone : +33 7 81 71 44 43</p>
+    <p>📧 Email : contact@olympemanagement.com</p>
+    <p>Expertise financière et solutions patrimoniales sur mesure.</p>
+</div>
+""", unsafe_allow_html=True)
+
+if st.button("Demander une Consultation"):
+    st.success("Merci de votre intérêt ! Nous vous contacterons sous peu.")
