@@ -51,7 +51,7 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 # Ajouter le logo en haut de la page
-logo = "path_to_your_logo/logo.png"  # Remplacez par le chemin d'accès à votre logo
+logo = "Olympe Financial group.svg"  # Remplacez par le chemin d'accès à votre logo
 st.image(logo, width=200)  # Ajustez la largeur selon vos besoins
 
 # En-tête
