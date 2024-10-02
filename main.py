@@ -5,7 +5,6 @@ import numpy as np
 import matplotlib.pyplot as plt
 import quantstats as qs
 from datetime import datetime, timedelta
-import tempfile
 
 # Configuration de la page Streamlit
 st.set_page_config(page_title="Olympe Financial Group - Analyse de Portefeuille", layout="wide")
@@ -14,7 +13,7 @@ st.set_page_config(page_title="Olympe Financial Group - Analyse de Portefeuille"
 @st.cache_data
 def download_data(tickers, start_date, end_date):
     data = yf.download(tickers, start=start_date, end=end_date)['Adj Close']
-    return data.tz_localize(None)  # Normalize dates
+    return data.tz_localize(None)
 
 # Fonction pour calculer les rendements
 def calculate_returns(prices):
@@ -35,8 +34,28 @@ portfolio_weights = {
     'MRK': 0.1109, 'PEP': 0.0447, 'JNJ': 0.0172, 'TSLA': 0.0583, 'AXP': 0.0053
 }
 
-# Interface utilisateur Streamlit
-st.title("Olympe Financial Group - Analyse de Portefeuille")
+# Style personnalisé
+st.markdown("""
+<style>
+.big-font {
+    font-size:30px !important;
+    font-weight: bold;
+    color: #1E3A8A;
+}
+.metric-value {
+    font-size: 24px;
+    font-weight: bold;
+    color: #1E3A8A;
+}
+.metric-label {
+    font-size: 16px;
+    color: #4B5563;
+}
+</style>
+""", unsafe_allow_html=True)
+
+# En-tête
+st.markdown("<p class='big-font'>Olympe Financial Group - Analyse de Portefeuille</p>", unsafe_allow_html=True)
 
 # Sélection de la période
 col1, col2 = st.columns(2)
@@ -55,78 +74,72 @@ if st.button("Analyser le portefeuille"):
     portfolio_returns = calculate_returns(portfolio_data)
     benchmark_returns = calculate_returns(benchmark_data)
 
-    # Ajuster les poids pour correspondre aux données disponibles
-    weights_series = pd.Series(portfolio_weights)
-    weights_series = weights_series.reindex(portfolio_returns.columns).dropna()
+    # Ajuster les poids
+    weights_series = pd.Series(portfolio_weights).reindex(portfolio_returns.columns).dropna()
     weights_series = weights_series / weights_series.sum()
 
-    # Calculer la performance du portefeuille
+    # Calculer la performance
     portfolio_performance = calculate_portfolio_performance(portfolio_returns, weights_series)
-
-    # Calculer la performance du benchmark (CAC 40)
     benchmark_performance = (1 + benchmark_returns).cumprod() * 100000
 
     # Visualisation des performances
     fig, ax = plt.subplots(figsize=(12, 6))
-    ax.plot(portfolio_performance.index, portfolio_performance, label='Portefeuille Olympe')
-    ax.plot(benchmark_performance.index, benchmark_performance, label='CAC 40')
-    ax.set_title('Comparaison des performances', fontweight='bold')
+    ax.plot(portfolio_performance.index, portfolio_performance, label='Portefeuille Olympe', color='#1E3A8A')
+    ax.plot(benchmark_performance.index, benchmark_performance, label='CAC 40', color='#9CA3AF')
+    ax.set_title('Comparaison des performances', fontweight='bold', fontsize=16)
     ax.set_xlabel('Date')
     ax.set_ylabel('Valeur du portefeuille (€)')
     ax.legend()
     ax.grid(True, linestyle='--', alpha=0.7)
-    
-    # Personnalisation du style pour correspondre à la charte graphique d'Olympe
-    ax.set_facecolor('#f0f0f0')  # Fond gris clair
-    fig.patch.set_facecolor('#ffffff')  # Fond blanc
+    ax.set_facecolor('#F3F4F6')
+    fig.patch.set_facecolor('#FFFFFF')
     ax.spines['top'].set_visible(False)
     ax.spines['right'].set_visible(False)
     
     st.pyplot(fig)
 
-    # Calculer et afficher les rendements totaux
-    portfolio_total_return = (portfolio_performance.iloc[-1] / portfolio_performance.iloc[0]) - 1
-    benchmark_total_return = (benchmark_performance.iloc[-1] / benchmark_performance.iloc[0]) - 1
+    # Calculer les métriques avec QuantStats
+    qs.extend_pandas()
+    metrics = qs.reports.metrics(portfolio_returns, benchmark_returns, mode='full')
 
+    # Afficher les métriques principales
+    col1, col2, col3 = st.columns(3)
+    with col1:
+        st.markdown("<p class='metric-label'>Rendement total</p>", unsafe_allow_html=True)
+        st.markdown(f"<p class='metric-value'>{metrics['Total Return'][0]:.2%}</p>", unsafe_allow_html=True)
+    with col2:
+        st.markdown("<p class='metric-label'>Ratio de Sharpe</p>", unsafe_allow_html=True)
+        st.markdown(f"<p class='metric-value'>{metrics['Sharpe'][0]:.2f}</p>", unsafe_allow_html=True)
+    with col3:
+        st.markdown("<p class='metric-label'>Volatilité annualisée</p>", unsafe_allow_html=True)
+        st.markdown(f"<p class='metric-value'>{metrics['Volatility (ann.)'][0]:.2%}</p>", unsafe_allow_html=True)
+
+    # Afficher d'autres métriques importantes
+    st.markdown("## Métriques détaillées")
     col1, col2 = st.columns(2)
     with col1:
-        st.metric("Performance du Portefeuille Olympe", f"{portfolio_total_return:.2%}")
+        st.metric("Alpha", f"{metrics['Alpha'][0]:.2%}")
+        st.metric("Bêta", f"{metrics['Beta'][0]:.2f}")
+        st.metric("Ratio de Sortino", f"{metrics['Sortino'][0]:.2f}")
     with col2:
-        st.metric("Performance du CAC 40", f"{benchmark_total_return:.2%}")
-
-    # Générer le rapport QuantStats
-    with st.spinner("Génération du rapport d'analyse..."):
-        qs.extend_pandas()
-        
-        # Créer un fichier temporaire pour le rapport
-        with tempfile.NamedTemporaryFile(delete=False, suffix='.html') as tmpfile:
-            qs.reports.html(portfolio_performance.pct_change(), 
-                            benchmark=benchmark_returns, 
-                            output=tmpfile.name,
-                            title="Rapport d'analyse du portefeuille Olympe")
-            
-            # Lire le contenu du fichier temporaire
-            with open(tmpfile.name, 'r') as f:
-                report_content = f.read()
-        
-        # Afficher le rapport dans Streamlit
-        st.components.v1.html(report_content, height=600, scrolling=True)
+        st.metric("Drawdown maximal", f"{metrics['Max Drawdown'][0]:.2%}")
+        st.metric("Ratio de Calmar", f"{metrics['Calmar'][0]:.2f}")
+        st.metric("Ratio d'information", f"{metrics['Information Ratio'][0]:.2f}")
 
 st.markdown("""
 ## Pourquoi choisir Olympe Financial Group ?
 
-Olympe Financial Group combine expertise financière et solutions personnalisées pour vous offrir le meilleur :
+Olympe Financial Group combine expertise financière et solutions personnalisées :
 
-- **Analyse financière approfondie** : Nos experts utilisent des techniques d'analyse de pointe pour comprendre les tendances du marché et optimiser vos investissements.
-- **Solutions patrimoniales sur mesure** : Nous élaborons des stratégies personnalisées adaptées à vos objectifs et votre profil de risque.
-- **Gestion proactive des risques** : Notre approche innovante a permis à nos clients de limiter leurs pertes, même dans des conditions de marché difficiles.
-- **Optimisation fiscale** : Nous identifions les opportunités d'optimisation fiscale pour maximiser la valeur de votre patrimoine.
+- **Analyse financière approfondie** : Techniques d'analyse de pointe pour optimiser vos investissements.
+- **Solutions patrimoniales sur mesure** : Stratégies adaptées à vos objectifs et votre profil de risque.
+- **Gestion proactive des risques** : Approche innovante pour limiter les pertes dans des conditions de marché difficiles.
+- **Optimisation fiscale** : Maximisation de la valeur de votre patrimoine.
 
-Faites confiance à Olympe Financial Group pour vous guider vers un avenir financier serein et prospère.
-
-[En savoir plus sur nos services](https://www.olympefinancialgroup.com)
+Faites confiance à Olympe Financial Group pour un avenir financier serein et prospère.
 """)
 
+# Sidebar
 st.sidebar.image("https://example.com/olympe_logo.png", use_column_width=True)
 st.sidebar.title("Olympe Financial Group")
 st.sidebar.info("Expertise financière et solutions patrimoniales sur mesure.")
