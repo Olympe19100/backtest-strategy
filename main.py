@@ -97,7 +97,7 @@ if st.button("Analyser le portefeuille"):
     
     st.pyplot(fig)
 
-    # Calcul manuel des métriques
+    # Fonction pour calculer les métriques
     def calculate_metrics(returns, benchmark_returns):
         # Rendement cumulatif
         cumulative_return = (returns + 1).prod() - 1
@@ -110,7 +110,7 @@ if st.button("Analyser le portefeuille"):
         volatility = returns.std() * np.sqrt(252)
         
         # Ratio de Sharpe (en supposant un taux sans risque de 0)
-        sharpe_ratio = (returns.mean() * 252) / volatility
+        sharpe_ratio = (returns.mean() * 252) / volatility if volatility != 0 else 0
         
         # Drawdown maximal
         cum_returns = (1 + returns).cumprod()
@@ -119,19 +119,19 @@ if st.button("Analyser le portefeuille"):
         # Alpha et Beta
         covariance = returns.cov(benchmark_returns)
         variance = benchmark_returns.var()
-        beta = covariance / variance
+        beta = covariance / variance if variance != 0 else 0
         alpha = (returns.mean() - beta * benchmark_returns.mean()) * 252
         
         # Ratio de Sortino (en supposant un taux sans risque de 0)
         downside_returns = returns[returns < 0]
-        sortino_ratio = (returns.mean() * 252) / (downside_returns.std() * np.sqrt(252))
+        sortino_ratio = (returns.mean() * 252) / (downside_returns.std() * np.sqrt(252)) if len(downside_returns) > 0 else 0
         
         # Ratio de Calmar
-        calmar_ratio = cagr / abs(max_drawdown)
+        calmar_ratio = cagr / abs(max_drawdown) if max_drawdown != 0 else 0
         
         # Ratio d'information
         tracking_error = (returns - benchmark_returns).std() * np.sqrt(252)
-        information_ratio = (returns.mean() - benchmark_returns.mean()) * 252 / tracking_error
+        information_ratio = (returns.mean() - benchmark_returns.mean()) * 252 / tracking_error if tracking_error != 0 else 0
         
         # Autres métriques
         time_in_market = len(returns[returns != 0]) / len(returns) * 100
