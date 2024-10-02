@@ -40,6 +40,13 @@ st.markdown("""
         border-radius: 5px;
         margin-top: 20px;
     }
+    .performance-section {
+        background-color: #E6F0FF;
+        padding: 20px;
+        border-radius: 5px;
+        margin-top: 30px;
+        margin-bottom: 30px;
+    }
 </style>
 """, unsafe_allow_html=True)
 
@@ -160,7 +167,34 @@ with col2:
     - **Optimisation Fiscale**: Nous identifions les opportunités pour maximiser la valeur de votre patrimoine.
     """)
 
-# Témoignages (fictifs pour l'exemple)
+# Nouvelle section sur les performances avancées
+st.markdown("""
+<div class="performance-section">
+    <h2>Nos Performances de Pointe en Gestion de Risque</h2>
+    <p>Découvrez comment nos algorithmes avancés ne se contentent pas seulement de choisir les meilleurs actifs, mais gèrent activement le risque pour optimiser vos rendements.</p>
+</div>
+""", unsafe_allow_html=True)
+
+# Charger et afficher le deuxième rapport HTML
+with open('chemin/vers/votre/rapport_gestion_risque.html', 'r') as f:
+    risk_management_report = f.read()
+
+st.components.v1.html(risk_management_report, height=600, scrolling=True)
+
+st.markdown("""
+<div class="highlight">
+    <h3>Ce que notre Gestion de Risque Avancée signifie pour vous :</h3>
+    <ul>
+        <li>Réduction significative de la volatilité du portefeuille</li>
+        <li>Protection accrue contre les baisses de marché</li>
+        <li>Optimisation du ratio rendement/risque</li>
+        <li>Adaptation dynamique aux conditions changeantes du marché</li>
+    </ul>
+    <p>En 2022, alors que de nombreux investisseurs subissaient des pertes importantes, nos clients ont bénéficié de notre gestion de risque proactive, limitant considérablement l'impact des turbulences du marché.</p>
+</div>
+""", unsafe_allow_html=True)
+
+# Témoignages
 st.header("Ce Que Disent Nos Clients")
 col1, col2 = st.columns(2)
 with col1:
@@ -180,7 +214,7 @@ st.markdown("""
 </div>
 """, unsafe_allow_html=True)
 
-# Information de contact (anciennement dans la sidebar)
+# Information de contact
 st.markdown("""
 <div class="contact-info">
     <h3>Contactez Olympe Financial Group</h3>
@@ -191,4 +225,4 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 if st.button("Demander une Consultation"):
-    st.success("Merci de votre intérêt ! Nous vous contacterons sous peu.")
+    st.success("Merci de votre intérêt ! Nous vous contacterons sous peu pour discuter de comment notre expertise en gestion de risque peut optimiser votre portefeuille.")
