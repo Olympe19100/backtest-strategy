@@ -20,6 +20,29 @@ def download_data(tickers, start_date, end_date):
 def calculate_returns(prices):
     return prices.pct_change().dropna()
 
+# Fonction pour créer un rapport simplifié
+def create_simplified_report(returns, benchmark):
+    fig, axes = plt.subplots(2, 2, figsize=(15, 15))
+    
+    # Rendements cumulatifs
+    qs.plots.returns(returns, benchmark, ax=axes[0, 0])
+    axes[0, 0].set_title("Rendements cumulatifs")
+    
+    # Drawdown
+    qs.plots.drawdown(returns, ax=axes[0, 1])
+    axes[0, 1].set_title("Drawdown")
+    
+    # Distribution mensuelle
+    qs.plots.monthly_returns(returns, ax=axes[1, 0])
+    axes[1, 0].set_title("Distribution mensuelle des rendements")
+    
+    # Volatilité annuelle
+    qs.plots.rolling_volatility(returns, ax=axes[1, 1])
+    axes[1, 1].set_title("Volatilité annuelle glissante")
+    
+    plt.tight_layout()
+    return fig
+
 # Définition du portefeuille avec les poids spécifiés
 portfolio_weights = {
     'AAPL': 0.0076, 'MSFT': 0.1285, 'GOOG': 0.0168, 'AMZN': 0.0174, 'META': 0.0526,
@@ -56,44 +79,41 @@ if st.button("Analyser le portefeuille"):
     if not isinstance(weighted_returns.index, pd.DatetimeIndex):
         st.error("Les données de rendement ne sont pas dans le format attendu. Veuillez vérifier vos données.")
     else:
-        # Générer le rapport QuantStats
+        # Générer le rapport
         with st.spinner("Génération du rapport d'analyse..."):
             qs.extend_pandas()
             
             try:
-                # Créer un fichier temporaire pour le rapport
+                # Essayer d'utiliser qs.reports.html()
                 with tempfile.NamedTemporaryFile(delete=False, suffix='.html') as tmpfile:
                     qs.reports.html(weighted_returns, 
-                                    benchmark=benchmark_returns, 
+                                    benchmark=benchmark_returns.squeeze(), 
                                     output=tmpfile.name,
                                     title="Rapport d'analyse du portefeuille Olympe")
                     
-                    # Lire le contenu du fichier temporaire
                     with open(tmpfile.name, 'r') as f:
                         report_content = f.read()
                 
-                # Afficher le rapport dans Streamlit
                 st.components.v1.html(report_content, height=600, scrolling=True)
-
-                # Afficher quelques métriques clés
-                metrics = qs.reports.metrics(weighted_returns, benchmark_returns, mode='full')
-                
-                st.subheader("Métriques clés")
-                col1, col2, col3 = st.columns(3)
-                with col1:
-                    st.metric("Rendement total", f"{metrics['Total Return'][0]:.2%}")
-                with col2:
-                    st.metric("Ratio de Sharpe", f"{metrics['Sharpe'][0]:.2f}")
-                with col3:
-                    st.metric("Max Drawdown", f"{metrics['Max Drawdown'][0]:.2%}")
             
             except Exception as e:
-                st.error(f"Une erreur s'est produite lors de la génération du rapport: {str(e)}")
-                st.write("Détails des données:")
-                st.write(f"Forme des rendements pondérés: {weighted_returns.shape}")
-                st.write(f"Type d'index: {type(weighted_returns.index)}")
-                st.write(f"Premières lignes des rendements pondérés:")
-                st.write(weighted_returns.head())
+                st.warning(f"Impossible de générer le rapport complet. Création d'un rapport simplifié. Erreur: {str(e)}")
+                
+                # Créer et afficher un rapport simplifié
+                fig = create_simplified_report(weighted_returns, benchmark_returns.squeeze())
+                st.pyplot(fig)
+
+            # Afficher quelques métriques clés
+            metrics = qs.reports.metrics(weighted_returns, benchmark_returns.squeeze(), mode='full')
+            
+            st.subheader("Métriques clés")
+            col1, col2, col3 = st.columns(3)
+            with col1:
+                st.metric("Rendement total", f"{metrics['Total Return'][0]:.2%}")
+            with col2:
+                st.metric("Ratio de Sharpe", f"{metrics['Sharpe'][0]:.2f}")
+            with col3:
+                st.metric("Max Drawdown", f"{metrics['Max Drawdown'][0]:.2%}")
 
 # Contenu inspiré de la plaquette commerciale
 st.markdown("""
