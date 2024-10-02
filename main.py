@@ -50,9 +50,51 @@ st.markdown("""
 </style>
 """, unsafe_allow_html=True)
 
-# Ajouter le logo en haut de la page
-logo = "Olympe Financial group.svg"  # Remplacez par le chemin d'accès à votre logo
-st.image(logo, width=200)  # Ajustez la largeur selon vos besoins
+# Fonction pour télécharger les données
+@st.cache_data
+def download_data(tickers, start_date, end_date):
+    data = yf.download(tickers, start=start_date, end=end_date)['Adj Close']
+    return data.tz_localize(None)
+
+# Fonction pour calculer les rendements
+def calculate_returns(prices):
+    return prices.pct_change().dropna()
+
+# Fonction pour créer un rapport simplifié
+def create_simplified_report(returns, benchmark):
+    fig, axes = plt.subplots(2, 2, figsize=(15, 15))
+    fig.patch.set_facecolor('white')
+    
+    # Rendements cumulatifs
+    qs.plots.returns(returns, benchmark, ax=axes[0, 0])
+    axes[0, 0].set_title("Rendements cumulatifs")
+    axes[0, 0].set_facecolor('white')
+    
+    # Drawdown
+    qs.plots.drawdown(returns, ax=axes[0, 1])
+    axes[0, 1].set_title("Drawdown")
+    axes[0, 1].set_facecolor('white')
+    
+    # Distribution mensuelle
+    qs.plots.monthly_returns(returns, ax=axes[1, 0])
+    axes[1, 0].set_title("Distribution mensuelle des rendements")
+    axes[1, 0].set_facecolor('white')
+    
+    # Volatilité annuelle
+    qs.plots.rolling_volatility(returns, ax=axes[1, 1])
+    axes[1, 1].set_title("Volatilité annuelle glissante")
+    axes[1, 1].set_facecolor('white')
+    
+    plt.tight_layout()
+    return fig
+
+# Définition du portefeuille avec les poids spécifiés
+portfolio_weights = {
+    'AAPL': 0.0076, 'MSFT': 0.1285, 'GOOG': 0.0168, 'AMZN': 0.0174, 'META': 0.0526,
+    'NVDA': 0.1525, 'V': 0.0207, 'MA': 0.0351, 'BRK-B': 0.0053, 'JPM': 0.0147,
+    'UNH': 0.2824, 'BLK': 0.0001, 'HD': 0.0215, 'T': 0.0063, 'PFE': 0.0021,
+    'MRK': 0.1109, 'PEP': 0.0447, 'JNJ': 0.0172, 'TSLA': 0.0583, 'AXP': 0.0053
+}
 
 # En-tête
 st.title("Olympe Financial Group - Façonnez Votre Avenir Financier")
@@ -60,13 +102,13 @@ st.title("Olympe Financial Group - Façonnez Votre Avenir Financier")
 st.markdown("""
 <div class="highlight">
     <h2>Expertise Financière à Votre Service</h2>
-    <p>Chez Olympe Financial Group, nous comprenons que votre avenir financier est unique. Nous croyons fermement que vous méritez une approche personnalisée, conçue pour répondre à vos besoins spécifiques. C'est pourquoi notre équipe d'experts utilise des stratégies financières de pointe pour vous aider à atteindre vos objectifs. Ensemble, nous pouvons bâtir un avenir financier plus sûr et plus prospère.</p>
+    <p>Chez Olympe Financial Group, nous combinons expertise financière de pointe et solutions personnalisées pour vous offrir le meilleur. Notre engagement envers l'excellence se traduit par des résultats tangibles et durables pour votre patrimoine.</p>
 </div>
 """, unsafe_allow_html=True)
 
 # Section d'analyse de portefeuille
 st.header("Analyse de Portefeuille Personnalisée")
-st.write("Votre portefeuille mérite une attention particulière. Nous vous offrons une analyse approfondie qui vous permet de prendre des décisions éclairées, basées sur des données fiables et des stratégies performantes.")
+st.write("Découvrez la puissance de notre analyse financière approfondie. Commencez dès maintenant !")
 
 col1, col2 = st.columns(2)
 with col1:
@@ -113,46 +155,62 @@ if st.button("Analyser Mon Portefeuille"):
 
 # Section "Pourquoi Nous Choisir"
 st.header("Pourquoi Choisir Olympe Financial Group ?")
-st.markdown("""
-Vous avez travaillé dur pour accumuler votre patrimoine, et il mérite une gestion à la hauteur de vos attentes. Voici pourquoi nous sommes le partenaire idéal pour votre avenir financier :
+col1, col2 = st.columns(2)
+with col1:
+    st.markdown("""
+    - **Expertise Financière Approfondie**: Nos experts utilisent des techniques d'analyse de pointe pour optimiser vos investissements.
+    - **Solutions Patrimoniales Sur Mesure**: Stratégies personnalisées adaptées à vos objectifs et votre profil de risque.
+    """)
+with col2:
+    st.markdown("""
+    - **Gestion Proactive des Risques**: Notre approche innovante a permis à nos clients de limiter leurs pertes, même dans des conditions de marché difficiles.
+    - **Optimisation Fiscale**: Nous identifions les opportunités pour maximiser la valeur de votre patrimoine.
+    """)
 
-- **Expertise Personnalisée**: Nos stratégies sont spécifiquement adaptées à votre profil et vos objectifs financiers. Vous bénéficiez d'une attention sur-mesure qui vous guide à chaque étape.
-- **Gestion Rigoureuse des Risques**: Notre approche vous protège des turbulences du marché, en vous aidant à minimiser les risques tout en maximisant vos opportunités.
-- **Optimisation de la Performance**: Nous utilisons des outils d'analyse avancés pour identifier les meilleures opportunités et vous permettre de dépasser vos attentes.
-
-Nous croyons fermement qu'une gestion proactive et rigoureuse de votre portefeuille vous mènera vers des résultats exceptionnels. Ensemble, nous transformerons vos ambitions en réalisations concrètes.
-""")
-
-# Section "Performance"
+# Nouvelle section sur les performances avancées
 st.markdown("""
 <div class="performance-section">
-    <h2>Performances Avancées en Gestion de Portefeuille</h2>
-    <p>Grâce à des algorithmes financiers de pointe et une gestion minutieuse des risques, nos stratégies vous permettent de tirer parti des opportunités tout en minimisant les pertes. Nos clients nous font confiance pour protéger et faire croître leur patrimoine, même dans des périodes de marché difficile.</p>
+    <h2>Nos Performances de Pointe en Gestion de Risque</h2>
+    <p>Découvrez comment nos algorithmes avancés ne se contentent pas seulement de choisir les meilleurs actifs, mais gèrent activement le risque pour optimiser vos rendements.</p>
 </div>
 """, unsafe_allow_html=True)
 
-# Charger et afficher le rapport HTML de gestion des risques
+# Charger et afficher le deuxième rapport HTML
 with open('rapport_performance (24).html', 'r') as f:
     risk_management_report = f.read()
 
 st.components.v1.html(risk_management_report, height=600, scrolling=True)
 
+st.markdown("""
+<div class="highlight">
+    <h3>Ce que notre Gestion de Risque Avancée signifie pour vous :</h3>
+    <ul>
+        <li>Réduction significative de la volatilité du portefeuille</li>
+        <li>Protection accrue contre les baisses de marché</li>
+        <li>Optimisation du ratio rendement/risque</li>
+        <li>Adaptation dynamique aux conditions changeantes du marché</li>
+    </ul>
+    <p>En 2022, alors que de nombreux investisseurs subissaient des pertes importantes, nos clients ont bénéficié de notre gestion de risque proactive, limitant considérablement l'impact des turbulences du marché.</p>
+</div>
+""", unsafe_allow_html=True)
+
 # Témoignages
 st.header("Ce Que Disent Nos Clients")
-st.markdown("""
-Chez Olympe Financial Group, nous croyons que nos clients sont notre meilleure publicité. Voici ce qu'ils disent à propos de notre service :
-
-- *"Grâce à Olympe Financial Group, j'ai pu optimiser mon portefeuille et atteindre mes objectifs financiers plus rapidement que je ne l'aurais imaginé."* - Sophie D., Entrepreneur.
-- *"L'expertise et le professionnalisme de l'équipe Olympe ont complètement transformé ma vision de la gestion patrimoniale."* - Marc L., Cadre Supérieur.
-
-Ces témoignages reflètent notre engagement à fournir des résultats exceptionnels. Vous aussi, faites le choix d'une gestion financière axée sur vos objectifs.
-""")
+col1, col2 = st.columns(2)
+with col1:
+    st.markdown("""
+    > "Grâce à Olympe Financial Group, j'ai pu optimiser mon portefeuille et atteindre mes objectifs financiers plus rapidement que je ne l'aurais imaginé." - Sophie D., Entrepreneur
+    """)
+with col2:
+    st.markdown("""
+    > "L'expertise et le professionnalisme de l'équipe Olympe ont complètement transformé ma vision de la gestion patrimoniale." - Marc L., Cadre Supérieur
+    """)
 
 # Appel à l'action
 st.markdown("""
 <div class="highlight">
     <h3>Prêt à Sécuriser Votre Avenir Financier ?</h3>
-    <p>Ne laissez pas passer l'occasion d'optimiser vos investissements. Contactez-nous dès aujourd'hui pour une consultation gratuite et personnalisée.</p>
+    <p>Ne laissez pas passer cette opportunité de transformer votre situation financière. Contactez-nous dès aujourd'hui pour une consultation gratuite et personnalisée.</p>
 </div>
 """, unsafe_allow_html=True)
 
@@ -164,5 +222,5 @@ st.markdown("""
     <p>📧 Email : contact@olympemanagement.com</p>
     <p>Expertise financière et solutions patrimoniales sur mesure.</p>
 </div>
-""", unsafe_allow_html=True)
+""", unsafe_allow_html=True) je voudrais rajouter mon logo en haut de page  IL FAUT FAIRE ATTENTION CAR la page html qui se créer au fure et à mesure ne marche plus 
 
