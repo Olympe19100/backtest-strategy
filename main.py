@@ -51,6 +51,9 @@ st.markdown("""
     font-size: 16px;
     color: #4B5563;
 }
+.sidebar .sidebar-content {
+    background-color: #F3F4F6;
+}
 </style>
 """, unsafe_allow_html=True)
 
@@ -103,7 +106,7 @@ if st.button("Analyser le portefeuille"):
     
     # Assurez-vous que portfolio_returns est une série
     if isinstance(portfolio_returns, pd.DataFrame):
-        portfolio_returns = portfolio_returns.iloc[:, 0]
+        portfolio_returns = portfolio_returns.sum(axis=1)
     
     # Nettoyage des données
     portfolio_returns = portfolio_returns.dropna().replace([np.inf, -np.inf], np.nan).dropna()
@@ -117,42 +120,51 @@ if st.button("Analyser le portefeuille"):
     # Calcul des métriques
     metrics = qs.reports.metrics(portfolio_returns, benchmark_returns, mode='full')
 
+    # Fonction pour afficher les métriques de manière sécurisée
+    def display_metric(metric_name, format_string="{:.2f}"):
+        try:
+            value = metrics.loc[metric_name, 'Strategy']
+            return format_string.format(value)
+        except (KeyError, ValueError, TypeError):
+            return "N/A"
+
     # Afficher les métriques principales
     st.markdown("## Métriques principales")
     col1, col2, col3 = st.columns(3)
     with col1:
         st.markdown("<p class='metric-label'>Rendement total</p>", unsafe_allow_html=True)
-        st.markdown(f"<p class='metric-value'>{metrics['Total Return'][0]:.2%}</p>", unsafe_allow_html=True)
+        st.markdown(f"<p class='metric-value'>{display_metric('Total Return', '{:.2%}')}</p>", unsafe_allow_html=True)
     with col2:
         st.markdown("<p class='metric-label'>Ratio de Sharpe</p>", unsafe_allow_html=True)
-        st.markdown(f"<p class='metric-value'>{metrics['Sharpe'][0]:.2f}</p>", unsafe_allow_html=True)
+        st.markdown(f"<p class='metric-value'>{display_metric('Sharpe')}</p>", unsafe_allow_html=True)
     with col3:
         st.markdown("<p class='metric-label'>Volatilité annualisée</p>", unsafe_allow_html=True)
-        st.markdown(f"<p class='metric-value'>{metrics['Volatility (ann.)'][0]:.2%}</p>", unsafe_allow_html=True)
+        st.markdown(f"<p class='metric-value'>{display_metric('Volatility (ann.)', '{:.2%}')}</p>", unsafe_allow_html=True)
 
     # Afficher d'autres métriques importantes
     st.markdown("## Métriques détaillées")
     col1, col2 = st.columns(2)
     with col1:
-        st.metric("Alpha", f"{metrics['Alpha'][0]:.2%}")
-        st.metric("Bêta", f"{metrics['Beta'][0]:.2f}")
-        st.metric("Ratio de Sortino", f"{metrics['Sortino'][0]:.2f}")
+        st.metric("Alpha", display_metric('Alpha', '{:.2%}'))
+        st.metric("Bêta", display_metric('Beta'))
+        st.metric("Ratio de Sortino", display_metric('Sortino'))
     with col2:
-        st.metric("Drawdown maximal", f"{metrics['Max Drawdown'][0]:.2%}")
-        st.metric("Ratio de Calmar", f"{metrics['Calmar'][0]:.2f}")
-        st.metric("Ratio d'information", f"{metrics['Information Ratio'][0]:.2f}")
+        st.metric("Drawdown maximal", display_metric('Max Drawdown', '{:.2%}'))
+        st.metric("Ratio de Calmar", display_metric('Calmar'))
+        st.metric("Ratio d'information", display_metric('Information Ratio'))
 
+# Contenu inspiré de la plaquette commerciale
 st.markdown("""
 ## Pourquoi choisir Olympe Financial Group ?
 
-Olympe Financial Group combine expertise financière et solutions personnalisées :
+Olympe Financial Group combine expertise financière et solutions personnalisées pour vous offrir le meilleur :
 
-- **Analyse financière approfondie** : Techniques d'analyse de pointe pour optimiser vos investissements.
-- **Solutions patrimoniales sur mesure** : Stratégies adaptées à vos objectifs et votre profil de risque.
-- **Gestion proactive des risques** : Approche innovante pour limiter les pertes dans des conditions de marché difficiles.
-- **Optimisation fiscale** : Maximisation de la valeur de votre patrimoine.
+- **Analyse financière approfondie** : Nos experts utilisent des techniques d'analyse de pointe pour comprendre les tendances du marché et optimiser vos investissements.
+- **Solutions patrimoniales sur mesure** : Nous élaborons des stratégies personnalisées adaptées à vos objectifs et votre profil de risque.
+- **Gestion proactive des risques** : Notre approche innovante a permis à nos clients de limiter leurs pertes, même dans des conditions de marché difficiles.
+- **Optimisation fiscale** : Nous identifions les opportunités d'optimisation fiscale pour maximiser la valeur de votre patrimoine.
 
-Faites confiance à Olympe Financial Group pour un avenir financier serein et prospère.
+Faites confiance à Olympe Financial Group pour vous guider vers un avenir financier serein et prospère.
 """)
 
 # Sidebar
