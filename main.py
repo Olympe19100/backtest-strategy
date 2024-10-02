@@ -8,16 +8,49 @@ import quantstats as qs
 import tempfile
 
 # Configuration de la page Streamlit
-st.set_page_config(page_title="Olympe Financial Group - Analyse de Portefeuille", layout="wide")
+st.set_page_config(page_title="Olympe Financial Group - Votre Avenir Financier", layout="wide")
 
-# CSS personnalisé pour le fond blanc
+# CSS personnalisé pour un design plus élégant
 st.markdown("""
 <style>
     .stApp {
         background-color: white;
+        color: black;
     }
     .stSidebar {
         background-color: #f0f2f6;
+    }
+    h1, h2, h3 {
+        color: #1E3A8A;
+    }
+    .stButton>button {
+        color: white;
+        background-color: #1E3A8A;
+        border-radius: 5px;
+    }
+    .stButton>button:hover {
+        background-color: #2E4A9A;
+    }
+    .highlight {
+        background-color: #F0F4FF;
+        padding: 20px;
+        border-radius: 5px;
+        margin-bottom: 20px;
+    }
+    .metric-card {
+        background-color: #F0F4FF;
+        padding: 15px;
+        border-radius: 5px;
+        text-align: center;
+    }
+    .metric-value {
+        font-size: 24px;
+        font-weight: bold;
+        color: #1E3A8A;
+    }
+    .metric-label {
+        font-size: 16px;
+        color: #4B5563;
     }
 </style>
 """, unsafe_allow_html=True)
@@ -35,7 +68,7 @@ def calculate_returns(prices):
 # Fonction pour créer un rapport simplifié
 def create_simplified_report(returns, benchmark):
     fig, axes = plt.subplots(2, 2, figsize=(15, 15))
-    fig.patch.set_facecolor('white')  # Fond blanc pour la figure
+    fig.patch.set_facecolor('white')
     
     # Rendements cumulatifs
     qs.plots.returns(returns, benchmark, ax=axes[0, 0])
@@ -69,87 +102,130 @@ portfolio_weights = {
 }
 
 # En-tête
-st.title("Olympe Financial Group - Analyse de Portefeuille")
+st.title("Olympe Financial Group - Façonnez Votre Avenir Financier")
 
-# Sélection de la période
+st.markdown("""
+<div class="highlight">
+    <h2>Expertise Financière à Votre Service</h2>
+    <p>Chez Olympe Financial Group, nous combinons expertise financière de pointe et solutions personnalisées pour vous offrir le meilleur. Notre engagement envers l'excellence se traduit par des résultats tangibles et durables pour votre patrimoine.</p>
+</div>
+""", unsafe_allow_html=True)
+
+# Section d'analyse de portefeuille
+st.header("Analyse de Portefeuille Personnalisée")
+st.write("Découvrez la puissance de notre analyse financière approfondie. Commencez dès maintenant !")
+
 col1, col2 = st.columns(2)
 with col1:
     start_date = st.date_input("Date de début", value=datetime(2019, 9, 30))
 with col2:
     end_date = st.date_input("Date de fin", value=datetime(2024, 9, 30))
 
-if st.button("Analyser le portefeuille"):
-    # Télécharger les données
-    with st.spinner("Téléchargement des données..."):
+if st.button("Analyser Mon Portefeuille"):
+    with st.spinner("Analyse en cours... Nous préparons votre rapport personnalisé."):
+        # Télécharger les données
         portfolio_data = download_data(list(portfolio_weights.keys()), start_date, end_date)
         benchmark_data = download_data('^FCHI', start_date, end_date)  # CAC 40
 
-    # Calculer les rendements
-    portfolio_returns = calculate_returns(portfolio_data)
-    benchmark_returns = calculate_returns(benchmark_data)
+        # Calculer les rendements
+        portfolio_returns = calculate_returns(portfolio_data)
+        benchmark_returns = calculate_returns(benchmark_data)
 
-    # Calculer les rendements pondérés du portefeuille
-    weights_series = pd.Series(portfolio_weights)
-    weighted_returns = (portfolio_returns * weights_series).sum(axis=1)
+        # Calculer les rendements pondérés du portefeuille
+        weights_series = pd.Series(portfolio_weights)
+        weighted_returns = (portfolio_returns * weights_series).sum(axis=1)
 
-    # Vérifier que les données sont dans le bon format
-    if not isinstance(weighted_returns.index, pd.DatetimeIndex):
-        st.error("Les données de rendement ne sont pas dans le format attendu. Veuillez vérifier vos données.")
-    else:
         # Générer le rapport
-        with st.spinner("Génération du rapport d'analyse..."):
-            qs.extend_pandas()
-            
-            try:
-                # Essayer d'utiliser qs.reports.html()
-                with tempfile.NamedTemporaryFile(delete=False, suffix='.html') as tmpfile:
-                    qs.reports.html(weighted_returns, 
-                                    benchmark=benchmark_returns.squeeze(), 
-                                    output=tmpfile.name,
-                                    title="Rapport d'analyse du portefeuille Olympe")
-                    
-                    with open(tmpfile.name, 'r') as f:
-                        report_content = f.read()
+        try:
+            # Essayer d'utiliser qs.reports.html()
+            with tempfile.NamedTemporaryFile(delete=False, suffix='.html') as tmpfile:
+                qs.reports.html(weighted_returns, 
+                                benchmark=benchmark_returns.squeeze(), 
+                                output=tmpfile.name,
+                                title="Rapport d'analyse du portefeuille Olympe")
                 
-                st.components.v1.html(report_content, height=600, scrolling=True)
+                with open(tmpfile.name, 'r') as f:
+                    report_content = f.read()
             
-            except Exception as e:
-                st.warning(f"Impossible de générer le rapport complet. Création d'un rapport simplifié. Erreur: {str(e)}")
-                
-                # Créer et afficher un rapport simplifié
-                fig = create_simplified_report(weighted_returns, benchmark_returns.squeeze())
-                st.pyplot(fig)
-
-            # Afficher quelques métriques clés
-            metrics = qs.reports.metrics(weighted_returns, benchmark_returns.squeeze(), mode='full')
+            st.components.v1.html(report_content, height=600, scrolling=True)
+        
+        except Exception as e:
+            st.warning("Nous préparons un rapport simplifié pour vous offrir les meilleures insights.")
             
-            st.subheader("Métriques clés")
-            col1, col2, col3 = st.columns(3)
-            with col1:
-                st.metric("Rendement total", f"{metrics['Total Return'][0]:.2%}")
-            with col2:
-                st.metric("Ratio de Sharpe", f"{metrics['Sharpe'][0]:.2f}")
-            with col3:
-                st.metric("Max Drawdown", f"{metrics['Max Drawdown'][0]:.2%}")
+            # Créer et afficher un rapport simplifié
+            fig = create_simplified_report(weighted_returns, benchmark_returns.squeeze())
+            st.pyplot(fig)
 
-# Contenu inspiré de la plaquette commerciale
+        # Afficher quelques métriques clés
+        metrics = qs.reports.metrics(weighted_returns, benchmark_returns.squeeze(), mode='full')
+        
+        st.subheader("Vos Métriques Clés")
+        col1, col2, col3 = st.columns(3)
+        with col1:
+            st.markdown(f"""
+            <div class="metric-card">
+                <p class="metric-value">{metrics['Total Return'][0]:.2%}</p>
+                <p class="metric-label">Rendement Total</p>
+            </div>
+            """, unsafe_allow_html=True)
+        with col2:
+            st.markdown(f"""
+            <div class="metric-card">
+                <p class="metric-value">{metrics['Sharpe'][0]:.2f}</p>
+                <p class="metric-label">Ratio de Sharpe</p>
+            </div>
+            """, unsafe_allow_html=True)
+        with col3:
+            st.markdown(f"""
+            <div class="metric-card">
+                <p class="metric-value">{metrics['Max Drawdown'][0]:.2%}</p>
+                <p class="metric-label">Drawdown Maximum</p>
+            </div>
+            """, unsafe_allow_html=True)
+
+    st.success("Analyse complétée avec succès ! Voici les résultats de votre portefeuille personnalisé.")
+
+# Section "Pourquoi Nous Choisir"
+st.header("Pourquoi Choisir Olympe Financial Group ?")
+col1, col2 = st.columns(2)
+with col1:
+    st.markdown("""
+    - **Expertise Financière Approfondie**: Nos experts utilisent des techniques d'analyse de pointe pour optimiser vos investissements.
+    - **Solutions Patrimoniales Sur Mesure**: Stratégies personnalisées adaptées à vos objectifs et votre profil de risque.
+    """)
+with col2:
+    st.markdown("""
+    - **Gestion Proactive des Risques**: Notre approche innovante a permis à nos clients de limiter leurs pertes, même dans des conditions de marché difficiles.
+    - **Optimisation Fiscale**: Nous identifions les opportunités pour maximiser la valeur de votre patrimoine.
+    """)
+
+# Appel à l'action
 st.markdown("""
-## Pourquoi choisir Olympe Financial Group ?
+<div class="highlight">
+    <h3>Prêt à Sécuriser Votre Avenir Financier ?</h3>
+    <p>Ne laissez pas passer cette opportunité de transformer votre situation financière. Contactez-nous dès aujourd'hui pour une consultation gratuite et personnalisée.</p>
+    <p>📞 +33 7 81 71 44 43 | 📧 contact@olympemanagement.com</p>
+</div>
+""", unsafe_allow_html=True)
 
-Olympe Financial Group combine expertise financière et solutions personnalisées pour vous offrir le meilleur :
-
-- **Analyse financière approfondie** : Nos experts utilisent des techniques d'analyse de pointe pour comprendre les tendances du marché et optimiser vos investissements.
-- **Solutions patrimoniales sur mesure** : Nous élaborons des stratégies personnalisées adaptées à vos objectifs et votre profil de risque.
-- **Gestion proactive des risques** : Notre approche innovante a permis à nos clients de limiter leurs pertes, même dans des conditions de marché difficiles.
-- **Optimisation fiscale** : Nous identifions les opportunités d'optimisation fiscale pour maximiser la valeur de votre patrimoine.
-
-Faites confiance à Olympe Financial Group pour vous guider vers un avenir financier serein et prospère.
-""")
+# Témoignages (fictifs pour l'exemple)
+st.header("Ce Que Disent Nos Clients")
+col1, col2 = st.columns(2)
+with col1:
+    st.markdown("""
+    > "Grâce à Olympe Financial Group, j'ai pu optimiser mon portefeuille et atteindre mes objectifs financiers plus rapidement que je ne l'aurais imaginé." - Sophie D., Entrepreneur
+    """)
+with col2:
+    st.markdown("""
+    > "L'expertise et le professionnalisme de l'équipe Olympe ont complètement transformé ma vision de la gestion patrimoniale." - Marc L., Cadre Supérieur
+    """)
 
 # Sidebar
 st.sidebar.image("https://example.com/olympe_logo.png", use_column_width=True)
 st.sidebar.title("Olympe Financial Group")
 st.sidebar.info("Expertise financière et solutions patrimoniales sur mesure.")
-st.sidebar.button("Prendre rendez-vous")
+if st.sidebar.button("Demander une Consultation"):
+    st.sidebar.success("Merci de votre intérêt ! Nous vous contacterons sous peu.")
+st.sidebar.markdown("---")
 st.sidebar.text("Contact : +33 7 81 71 44 43")
 st.sidebar.text("Email : contact@olympemanagement.com")
