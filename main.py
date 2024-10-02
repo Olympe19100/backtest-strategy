@@ -105,8 +105,9 @@ st.title("Olympe Financial Group - Façonnez Votre Avenir Financier")
 st.markdown("""
 <div class="highlight">
     <h2>Expertise Financière à Votre Service</h2>
-    <p>Chez Olympe Financial Group, nous combinons expertise financière de pointe et solutions personnalisées pour vous offrir le meilleur. Notre engagement envers l'excellence se traduit par des résultats tangibles et durables pour votre patrimoine.</p>
-</div>
+   <p>Chez Olympe Financial Group, nous allons bien au-delà des solutions classiques. Nous nous appuyons sur un large réseau de partenariats stratégiques et collaborons avec des professionnels agréés et réglementés par l'AMF et enregistrés à l'ORIAS, pour vous fournir des conseils financiers personnalisés et en toute sécurité. 
+Grâce à nos algorithmes avancés, nous analysons toutes les sociétés cotées à travers le monde pour identifier les meilleures opportunités d'investissement. Notre engagement est simple : capturer les meilleures performances et garantir des résultats concrets et durables pour votre patrimoine.</p>
+
 """, unsafe_allow_html=True)
 
 # Section d'analyse de portefeuille
