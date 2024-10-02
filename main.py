@@ -3,7 +3,6 @@ import yfinance as yf
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
-import quantstats as qs
 from datetime import datetime, timedelta
 
 # Configuration de la page Streamlit
@@ -51,9 +50,6 @@ st.markdown("""
     font-size: 16px;
     color: #4B5563;
 }
-.sidebar .sidebar-content {
-    background-color: #F3F4F6;
-}
 </style>
 """, unsafe_allow_html=True)
 
@@ -63,9 +59,9 @@ st.markdown("<p class='big-font'>Olympe Financial Group - Analyse de Portefeuill
 # Sélection de la période
 col1, col2 = st.columns(2)
 with col1:
-    start_date = st.date_input("Date de début", value=datetime.now() - timedelta(days=5*365))
+    start_date = st.date_input("Date de début", value=datetime(2019, 9, 30))
 with col2:
-    end_date = st.date_input("Date de fin", value=datetime.now())
+    end_date = st.date_input("Date de fin", value=datetime(2024, 9, 30))
 
 if st.button("Analyser le portefeuille"):
     # Télécharger les données
@@ -101,57 +97,108 @@ if st.button("Analyser le portefeuille"):
     
     st.pyplot(fig)
 
-    # Calculer les métriques avec QuantStats
-    qs.extend_pandas()
-    
-    # Assurez-vous que portfolio_returns est une série
-    if isinstance(portfolio_returns, pd.DataFrame):
-        portfolio_returns = portfolio_returns.sum(axis=1)
-    
-    # Nettoyage des données
-    portfolio_returns = portfolio_returns.dropna().replace([np.inf, -np.inf], np.nan).dropna()
-    benchmark_returns = benchmark_returns.dropna().replace([np.inf, -np.inf], np.nan).dropna()
-    
-    # Alignement des index
-    common_index = portfolio_returns.index.intersection(benchmark_returns.index)
-    portfolio_returns = portfolio_returns.loc[common_index]
-    benchmark_returns = benchmark_returns.loc[common_index]
-    
-    # Calcul des métriques
-    metrics = qs.reports.metrics(portfolio_returns, benchmark_returns, mode='full')
+    # Calcul manuel des métriques
+    def calculate_metrics(returns, benchmark_returns):
+        # Rendement cumulatif
+        cumulative_return = (returns + 1).prod() - 1
+        
+        # CAGR
+        years = (returns.index[-1] - returns.index[0]).days / 365.25
+        cagr = (1 + cumulative_return) ** (1 / years) - 1
+        
+        # Volatilité annualisée
+        volatility = returns.std() * np.sqrt(252)
+        
+        # Ratio de Sharpe (en supposant un taux sans risque de 0)
+        sharpe_ratio = (returns.mean() * 252) / volatility
+        
+        # Drawdown maximal
+        cum_returns = (1 + returns).cumprod()
+        max_drawdown = (cum_returns / cum_returns.cummax() - 1).min()
+        
+        # Alpha et Beta
+        covariance = returns.cov(benchmark_returns)
+        variance = benchmark_returns.var()
+        beta = covariance / variance
+        alpha = (returns.mean() - beta * benchmark_returns.mean()) * 252
+        
+        # Ratio de Sortino (en supposant un taux sans risque de 0)
+        downside_returns = returns[returns < 0]
+        sortino_ratio = (returns.mean() * 252) / (downside_returns.std() * np.sqrt(252))
+        
+        # Ratio de Calmar
+        calmar_ratio = cagr / abs(max_drawdown)
+        
+        # Ratio d'information
+        tracking_error = (returns - benchmark_returns).std() * np.sqrt(252)
+        information_ratio = (returns.mean() - benchmark_returns.mean()) * 252 / tracking_error
+        
+        # Autres métriques
+        time_in_market = len(returns[returns != 0]) / len(returns) * 100
+        best_day = returns.max()
+        worst_day = returns.min()
+        best_month = returns.resample('M').sum().max()
+        worst_month = returns.resample('M').sum().min()
+        win_days_pct = (returns > 0).sum() / len(returns) * 100
+        
+        return {
+            'Start Period': returns.index[0].strftime('%Y-%m-%d'),
+            'End Period': returns.index[-1].strftime('%Y-%m-%d'),
+            'Time in Market': time_in_market,
+            'Cumulative Return': cumulative_return,
+            'CAGR﹪': cagr,
+            'Sharpe': sharpe_ratio,
+            'Sortino': sortino_ratio,
+            'Max Drawdown': max_drawdown,
+            'Volatility (ann.)': volatility,
+            'Alpha': alpha,
+            'Beta': beta,
+            'Information Ratio': information_ratio,
+            'Calmar': calmar_ratio,
+            'Best Day': best_day,
+            'Worst Day': worst_day,
+            'Best Month': best_month,
+            'Worst Month': worst_month,
+            'Win Days %': win_days_pct
+        }
 
-    # Fonction pour afficher les métriques de manière sécurisée
-    def display_metric(metric_name, format_string="{:.2f}"):
-        try:
-            value = metrics.loc[metric_name, 'Strategy']
-            return format_string.format(value)
-        except (KeyError, ValueError, TypeError):
-            return "N/A"
+    # Calculer les métriques
+    portfolio_metrics = calculate_metrics(portfolio_returns.sum(axis=1), benchmark_returns)
+    benchmark_metrics = calculate_metrics(benchmark_returns, benchmark_returns)
 
     # Afficher les métriques principales
     st.markdown("## Métriques principales")
     col1, col2, col3 = st.columns(3)
     with col1:
-        st.markdown("<p class='metric-label'>Rendement total</p>", unsafe_allow_html=True)
-        st.markdown(f"<p class='metric-value'>{display_metric('Total Return', '{:.2%}')}</p>", unsafe_allow_html=True)
+        st.markdown("<p class='metric-label'>Rendement cumulatif</p>", unsafe_allow_html=True)
+        st.markdown(f"<p class='metric-value'>{portfolio_metrics['Cumulative Return']:.2%}</p>", unsafe_allow_html=True)
     with col2:
-        st.markdown("<p class='metric-label'>Ratio de Sharpe</p>", unsafe_allow_html=True)
-        st.markdown(f"<p class='metric-value'>{display_metric('Sharpe')}</p>", unsafe_allow_html=True)
+        st.markdown("<p class='metric-label'>CAGR</p>", unsafe_allow_html=True)
+        st.markdown(f"<p class='metric-value'>{portfolio_metrics['CAGR﹪']:.2%}</p>", unsafe_allow_html=True)
     with col3:
-        st.markdown("<p class='metric-label'>Volatilité annualisée</p>", unsafe_allow_html=True)
-        st.markdown(f"<p class='metric-value'>{display_metric('Volatility (ann.)', '{:.2%}')}</p>", unsafe_allow_html=True)
+        st.markdown("<p class='metric-label'>Ratio de Sharpe</p>", unsafe_allow_html=True)
+        st.markdown(f"<p class='metric-value'>{portfolio_metrics['Sharpe']:.2f}</p>", unsafe_allow_html=True)
 
     # Afficher d'autres métriques importantes
     st.markdown("## Métriques détaillées")
     col1, col2 = st.columns(2)
     with col1:
-        st.metric("Alpha", display_metric('Alpha', '{:.2%}'))
-        st.metric("Bêta", display_metric('Beta'))
-        st.metric("Ratio de Sortino", display_metric('Sortino'))
+        st.metric("Volatilité annualisée", f"{portfolio_metrics['Volatility (ann.)']:.2%}")
+        st.metric("Max Drawdown", f"{portfolio_metrics['Max Drawdown']:.2%}")
+        st.metric("Ratio de Sortino", f"{portfolio_metrics['Sortino']:.2f}")
     with col2:
-        st.metric("Drawdown maximal", display_metric('Max Drawdown', '{:.2%}'))
-        st.metric("Ratio de Calmar", display_metric('Calmar'))
-        st.metric("Ratio d'information", display_metric('Information Ratio'))
+        st.metric("Alpha", f"{portfolio_metrics['Alpha']:.2%}")
+        st.metric("Beta", f"{portfolio_metrics['Beta']:.2f}")
+        st.metric("Ratio d'information", f"{portfolio_metrics['Information Ratio']:.2f}")
+
+    # Afficher un tableau comparatif
+    st.markdown("## Comparaison avec le benchmark")
+    comparison_df = pd.DataFrame({
+        'Métrique': portfolio_metrics.keys(),
+        'Portefeuille Olympe': portfolio_metrics.values(),
+        'Benchmark (CAC 40)': benchmark_metrics.values()
+    })
+    st.table(comparison_df.set_index('Métrique'))
 
 # Contenu inspiré de la plaquette commerciale
 st.markdown("""
