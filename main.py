@@ -10,6 +10,18 @@ import tempfile
 # Configuration de la page Streamlit
 st.set_page_config(page_title="Olympe Financial Group - Analyse de Portefeuille", layout="wide")
 
+# CSS personnalisé pour le fond blanc
+st.markdown("""
+<style>
+    .stApp {
+        background-color: white;
+    }
+    .stSidebar {
+        background-color: #f0f2f6;
+    }
+</style>
+""", unsafe_allow_html=True)
+
 # Fonction pour télécharger les données
 @st.cache_data
 def download_data(tickers, start_date, end_date):
@@ -23,22 +35,27 @@ def calculate_returns(prices):
 # Fonction pour créer un rapport simplifié
 def create_simplified_report(returns, benchmark):
     fig, axes = plt.subplots(2, 2, figsize=(15, 15))
+    fig.patch.set_facecolor('white')  # Fond blanc pour la figure
     
     # Rendements cumulatifs
     qs.plots.returns(returns, benchmark, ax=axes[0, 0])
     axes[0, 0].set_title("Rendements cumulatifs")
+    axes[0, 0].set_facecolor('white')
     
     # Drawdown
     qs.plots.drawdown(returns, ax=axes[0, 1])
     axes[0, 1].set_title("Drawdown")
+    axes[0, 1].set_facecolor('white')
     
     # Distribution mensuelle
     qs.plots.monthly_returns(returns, ax=axes[1, 0])
     axes[1, 0].set_title("Distribution mensuelle des rendements")
+    axes[1, 0].set_facecolor('white')
     
     # Volatilité annuelle
     qs.plots.rolling_volatility(returns, ax=axes[1, 1])
     axes[1, 1].set_title("Volatilité annuelle glissante")
+    axes[1, 1].set_facecolor('white')
     
     plt.tight_layout()
     return fig
