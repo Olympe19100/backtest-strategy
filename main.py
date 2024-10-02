@@ -80,7 +80,6 @@ if st.button("Analyser le portefeuille"):
     fig.patch.set_facecolor('#ffffff')  # Fond blanc
     ax.spines['top'].set_visible(False)
     ax.spines['right'].set_visible(False)
-    plt.style.use('seaborn-whitegrid')
     
     st.pyplot(fig)
 
