@@ -1,6 +1,8 @@
 import streamlit as st
 import yfinance as yf
 import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
 import quantstats as qs
 from datetime import datetime, timedelta
 import tempfile
@@ -13,6 +15,17 @@ st.set_page_config(page_title="Olympe Financial Group - Analyse de Portefeuille"
 def download_data(tickers, start_date, end_date):
     data = yf.download(tickers, start=start_date, end=end_date)['Adj Close']
     return data.tz_localize(None)  # Normalize dates
+
+# Fonction pour calculer les rendements
+def calculate_returns(prices):
+    return prices.pct_change().dropna()
+
+# Fonction pour calculer la performance du portefeuille
+def calculate_portfolio_performance(returns, weights, initial_investment=100000):
+    weighted_returns = returns.mul(weights, axis=1).sum(axis=1)
+    cumulative_returns = (1 + weighted_returns).cumprod()
+    portfolio_value = initial_investment * cumulative_returns
+    return portfolio_value
 
 # Définition du portefeuille avec les poids spécifiés
 portfolio_weights = {
@@ -32,18 +45,54 @@ with col1:
 with col2:
     end_date = st.date_input("Date de fin", value=datetime.now())
 
-if st.button("Générer le rapport d'analyse"):
+if st.button("Analyser le portefeuille"):
     # Télécharger les données
     with st.spinner("Téléchargement des données..."):
         portfolio_data = download_data(list(portfolio_weights.keys()), start_date, end_date)
         benchmark_data = download_data('^FCHI', start_date, end_date)  # CAC 40
 
-    # Calculer les rendements du portefeuille
-    weights = pd.Series(portfolio_weights)
-    portfolio_returns = (portfolio_data * weights).sum(axis=1).pct_change().dropna()
+    # Calculer les rendements
+    portfolio_returns = calculate_returns(portfolio_data)
+    benchmark_returns = calculate_returns(benchmark_data)
 
-    # Calculer les rendements du benchmark
-    benchmark_returns = benchmark_data.pct_change().dropna()
+    # Ajuster les poids pour correspondre aux données disponibles
+    weights_series = pd.Series(portfolio_weights)
+    weights_series = weights_series.reindex(portfolio_returns.columns).dropna()
+    weights_series = weights_series / weights_series.sum()
+
+    # Calculer la performance du portefeuille
+    portfolio_performance = calculate_portfolio_performance(portfolio_returns, weights_series)
+
+    # Calculer la performance du benchmark (CAC 40)
+    benchmark_performance = (1 + benchmark_returns).cumprod() * 100000
+
+    # Visualisation des performances
+    fig, ax = plt.subplots(figsize=(12, 6))
+    ax.plot(portfolio_performance.index, portfolio_performance, label='Portefeuille Olympe')
+    ax.plot(benchmark_performance.index, benchmark_performance, label='CAC 40')
+    ax.set_title('Comparaison des performances', fontweight='bold')
+    ax.set_xlabel('Date')
+    ax.set_ylabel('Valeur du portefeuille (€)')
+    ax.legend()
+    ax.grid(True, linestyle='--', alpha=0.7)
+    
+    # Personnalisation du style pour correspondre à la charte graphique d'Olympe
+    ax.set_facecolor('#f0f0f0')  # Fond gris clair
+    fig.patch.set_facecolor('#ffffff')  # Fond blanc
+    ax.spines['top'].set_visible(False)
+    ax.spines['right'].set_visible(False)
+    
+    st.pyplot(fig)
+
+    # Calculer et afficher les rendements totaux
+    portfolio_total_return = (portfolio_performance.iloc[-1] / portfolio_performance.iloc[0]) - 1
+    benchmark_total_return = (benchmark_performance.iloc[-1] / benchmark_performance.iloc[0]) - 1
+
+    col1, col2 = st.columns(2)
+    with col1:
+        st.metric("Performance du Portefeuille Olympe", f"{portfolio_total_return:.2%}")
+    with col2:
+        st.metric("Performance du CAC 40", f"{benchmark_total_return:.2%}")
 
     # Générer le rapport QuantStats
     with st.spinner("Génération du rapport d'analyse..."):
@@ -51,24 +100,32 @@ if st.button("Générer le rapport d'analyse"):
         
         # Créer un fichier temporaire pour le rapport
         with tempfile.NamedTemporaryFile(delete=False, suffix='.html') as tmpfile:
-            try:
-                qs.reports.html(portfolio_returns, 
-                                benchmark=benchmark_returns, 
-                                output=tmpfile.name,
-                                title="Rapport d'analyse du portefeuille Olympe")
-                
-                # Lire le contenu du fichier temporaire
-                with open(tmpfile.name, 'r') as f:
-                    report_content = f.read()
-                
-                # Afficher le rapport dans Streamlit
-                st.components.v1.html(report_content, height=1000, scrolling=True)
-            except Exception as e:
-                st.error(f"Une erreur s'est produite lors de la génération du rapport : {str(e)}")
-                st.write("Aperçu des données du portefeuille :")
-                st.write(portfolio_returns.head())
-                st.write("Aperçu des données du benchmark :")
-                st.write(benchmark_returns.head())
+            qs.reports.html(portfolio_performance.pct_change(), 
+                            benchmark=benchmark_returns, 
+                            output=tmpfile.name,
+                            title="Rapport d'analyse du portefeuille Olympe")
+            
+            # Lire le contenu du fichier temporaire
+            with open(tmpfile.name, 'r') as f:
+                report_content = f.read()
+        
+        # Afficher le rapport dans Streamlit
+        st.components.v1.html(report_content, height=600, scrolling=True)
+
+st.markdown("""
+## Pourquoi choisir Olympe Financial Group ?
+
+Olympe Financial Group combine expertise financière et solutions personnalisées pour vous offrir le meilleur :
+
+- **Analyse financière approfondie** : Nos experts utilisent des techniques d'analyse de pointe pour comprendre les tendances du marché et optimiser vos investissements.
+- **Solutions patrimoniales sur mesure** : Nous élaborons des stratégies personnalisées adaptées à vos objectifs et votre profil de risque.
+- **Gestion proactive des risques** : Notre approche innovante a permis à nos clients de limiter leurs pertes, même dans des conditions de marché difficiles.
+- **Optimisation fiscale** : Nous identifions les opportunités d'optimisation fiscale pour maximiser la valeur de votre patrimoine.
+
+Faites confiance à Olympe Financial Group pour vous guider vers un avenir financier serein et prospère.
+
+[En savoir plus sur nos services](https://www.olympefinancialgroup.com)
+""")
 
 st.sidebar.image("https://example.com/olympe_logo.png", use_column_width=True)
 st.sidebar.title("Olympe Financial Group")
