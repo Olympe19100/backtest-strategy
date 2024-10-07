@@ -6,7 +6,6 @@ import matplotlib.pyplot as plt
 from datetime import datetime, timedelta
 import quantstats as qs
 import tempfile
-import seaborn as sns
 
 # Configuration de la page Streamlit
 st.set_page_config(page_title="Olympe Financial Group - Votre Avenir Financier", layout="wide")
@@ -48,15 +47,15 @@ st.markdown("""
         margin-top: 30px;
         margin-bottom: 30px;
     }
-    [data-testid="stSidebar"] * {
-        color: white !important;
+    /* Changer la couleur du texte dans la barre latérale en blanc */
+    .css-1d391kg {
+        color: white;
     }
 </style>
 """, unsafe_allow_html=True)
 
-# Affichage du logo
-logo = "Olympe Financial group.svg"
-st.image(logo, width=200)
+logo = "Olympe Financial group.svg"  # Remplacez par le chemin d'accès à votre logo
+st.image(logo, width=200)  
 
 # Fonction pour télécharger les données
 @st.cache_data
@@ -73,45 +72,28 @@ def create_simplified_report(returns, benchmark):
     fig, axes = plt.subplots(2, 2, figsize=(15, 15))
     fig.patch.set_facecolor('white')
     
+    # Rendements cumulatifs
     qs.plots.returns(returns, benchmark, ax=axes[0, 0])
     axes[0, 0].set_title("Rendements cumulatifs")
     axes[0, 0].set_facecolor('white')
     
+    # Drawdown
     qs.plots.drawdown(returns, ax=axes[0, 1])
     axes[0, 1].set_title("Drawdown")
     axes[0, 1].set_facecolor('white')
     
+    # Distribution mensuelle
     qs.plots.monthly_returns(returns, ax=axes[1, 0])
     axes[1, 0].set_title("Distribution mensuelle des rendements")
     axes[1, 0].set_facecolor('white')
     
+    # Volatilité annuelle
     qs.plots.rolling_volatility(returns, ax=axes[1, 1])
     axes[1, 1].set_title("Volatilité annuelle glissante")
     axes[1, 1].set_facecolor('white')
     
     plt.tight_layout()
     return fig
-
-# Fonction pour générer le rapport HTML avec note sur le benchmark
-def generate_html_report(returns, benchmark_returns, output_file, title, benchmark_name):
-    benchmark_note = f"""
-    <div style="background-color: #f0f0f0; padding: 10px; margin: 10px 0; border-radius: 5px;">
-        <strong>Note:</strong> Le benchmark utilisé dans ce rapport est le {benchmark_name}.
-    </div>
-    """
-    
-    qs.reports.html(returns, 
-                    benchmark=benchmark_returns, 
-                    output=output_file,
-                    title=title)
-    
-    with open(output_file, 'r', encoding='utf-8') as f:
-        content = f.read()
-    
-    modified_content = content.replace('<body>', f'<body>{benchmark_note}')
-    
-    with open(output_file, 'w', encoding='utf-8') as f:
-        f.write(modified_content)
 
 # Définition du portefeuille avec les poids spécifiés
 portfolio_weights = {
@@ -126,7 +108,7 @@ glossary = {
     "Risk-Free Rate (Taux sans risque)": "Le taux de rendement d'un investissement considéré comme sans risque, généralement basé sur les obligations d'État.",
     "Time in Market (Temps sur le marché)": "Pourcentage du temps pendant lequel le portefeuille est investi sur le marché.",
     "Cumulative Return (Rendement cumulé)": "Le rendement total du portefeuille sur la période considérée, exprimé en pourcentage.",
-    "CAGR % (Taux de croissance annuel composé)": "Le taux de rendement annuel moyen sur la période, prenant en compte la capitalisation des gains.",
+    "CAGR % (Taux de croissance annuel composé)": "Le taux de rendement annuel moyen sur la période, prenant en compte la capitalisation des gains.",
     "Sharpe Ratio": "Mesure du rendement excédentaire par unité de risque (volatilité totale).",
     "Probabilistic Sharpe Ratio": "Probabilité que le Sharpe Ratio réel soit supérieur à zéro, basé sur les données historiques.",
     "Smart Sharpe": "Version ajustée du Sharpe Ratio tenant compte de la non-normalité des rendements.",
@@ -185,9 +167,9 @@ st.title("Olympe Financial Group - Façonnez Votre Avenir Financier")
 st.markdown("""
 <div class="highlight">
     <h2>Expertise Financière à Votre Service</h2>
-    <p>Chez Olympe Financial Group, nous allons bien au-delà des solutions classiques. Nous nous appuyons sur un large réseau de partenariats stratégiques et collaborons avec des professionnels agréés et réglementés par l'AMF et enregistrés à l'ORIAS, pour vous fournir des conseils financiers personnalisés et en toute sécurité. 
-    Grâce à nos algorithmes avancés, nous analysons toutes les sociétés cotées à travers le monde pour identifier les meilleures opportunités d'investissement. Notre engagement est simple : capturer les meilleures performances et garantir des résultats concrets et durables pour votre patrimoine.</p>
-</div>
+   <p>Chez Olympe Financial Group, nous allons bien au-delà des solutions classiques. Nous nous appuyons sur un large réseau de partenariats stratégiques et collaborons avec des professionnels agréés et réglementés par l'AMF et enregistrés à l'ORIAS, pour vous fournir des conseils financiers personnalisés et en toute sécurité. 
+Grâce à nos algorithmes avancés, nous analysons toutes les sociétés cotées à travers le monde pour identifier les meilleures opportunités d'investissement. Notre engagement est simple : capturer les meilleures performances et garantir des résultats concrets et durables pour votre patrimoine.</p>
+
 """, unsafe_allow_html=True)
 
 # Section d'analyse de portefeuille
@@ -202,32 +184,39 @@ with col2:
 
 if st.button("Analyser Mon Portefeuille"):
     with st.spinner("Analyse en cours... Nous préparons votre rapport personnalisé."):
+        # Télécharger les données
         portfolio_data = download_data(list(portfolio_weights.keys()), start_date, end_date)
         benchmark_data = download_data('^FCHI', start_date, end_date)  # CAC 40
 
+        # Vérifier que les données ont été téléchargées correctement
         if portfolio_data.empty or benchmark_data.empty:
             st.error("Les données financières n'ont pas pu être téléchargées. Veuillez réessayer plus tard.")
         else:
+            # Calculer les rendements
             portfolio_returns = calculate_returns(portfolio_data)
             benchmark_returns = calculate_returns(benchmark_data)
 
+            # Calculer les rendements pondérés du portefeuille
             weights_series = pd.Series(portfolio_weights)
             weighted_returns = (portfolio_returns * weights_series).sum(axis=1)
 
+            # Générer le rapport
             try:
                 with tempfile.NamedTemporaryFile(delete=False, suffix='.html') as tmpfile:
-                    generate_html_report(weighted_returns, 
-                                         benchmark_returns.squeeze(), 
-                                         tmpfile.name,
-                                         "Rapport d'analyse du portefeuille Olympe",
-                                         "CAC 40")
+                    qs.reports.html(weighted_returns, 
+                                    benchmark=benchmark_returns.squeeze(), 
+                                    output=tmpfile.name,
+                                    title="Rapport d'analyse du portefeuille Olympe")
                     with open(tmpfile.name, 'r') as f:
                         report_content = f.read()
 
+                # Afficher le rapport
                 st.components.v1.html(report_content, height=800, scrolling=True)
 
             except Exception as e:
                 st.warning("Nous préparons un rapport simplifié pour vous offrir les meilleures insights.")
+
+                # Créer et afficher un rapport simplifié
                 fig = create_simplified_report(weighted_returns, benchmark_returns.squeeze())
                 st.pyplot(fig)
 
@@ -255,33 +244,11 @@ st.markdown("""
 </div>
 """, unsafe_allow_html=True)
 
-# Générer le deuxième rapport avec le S&P 500 comme benchmark
-with st.spinner("Génération du rapport de performance avancée..."):
-    # Télécharger les données du S&P 500 comme benchmark
-    sp500_data = download_data('^GSPC', start_date, end_date)  # S&P 500
+# Charger et afficher le deuxième rapport HTML
+with open('rapport_performance (24).html', 'r') as f:
+    risk_management_report = f.read()
 
-    # Vérifier que les données ont été téléchargées correctement
-    if sp500_data.empty:
-        st.error("Les données du S&P 500 n'ont pas pu être téléchargées. Veuillez réessayer plus tard.")
-    else:
-        sp500_returns = calculate_returns(sp500_data)
-
-        # Générer le deuxième rapport avec le S&P 500 comme benchmark
-        try:
-            with tempfile.NamedTemporaryFile(delete=False, suffix='.html') as tmpfile:
-                generate_html_report(weighted_returns, 
-                                     sp500_returns.squeeze(), 
-                                     tmpfile.name,
-                                     "Rapport de Performance Avancée avec Gestion de Risque",
-                                     "S&P 500")
-                with open(tmpfile.name, 'r') as f:
-                    advanced_report_content = f.read()
-
-            # Afficher le rapport
-            st.components.v1.html(advanced_report_content, height=800, scrolling=True)
-
-        except Exception as e:
-            st.error("Une erreur est survenue lors de la génération du rapport avancé.")
+st.components.v1.html(risk_management_report, height=600, scrolling=True)
 
 st.markdown("""
 <div class="highlight">
@@ -351,3 +318,4 @@ st.markdown("""
     <p>Expertise financière et solutions patrimoniales sur mesure.</p>
 </div>
 """, unsafe_allow_html=True)
+
