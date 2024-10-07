@@ -8,6 +8,7 @@ import quantstats as qs
 import tempfile
 
 # CSS personnalisé pour un design plus élégant
+# CSS personnalisé pour un design plus élégant
 st.markdown("""
 <style>
     .stApp {
@@ -45,11 +46,12 @@ st.markdown("""
         margin-bottom: 30px;
     }
     /* Changer la couleur du texte dans la barre latérale en blanc */
-    .css-1d391kg, .css-1v3fvcr, .css-1y4p8pa, .css-1d0iiyk {
+    .css-1d391kg, .css-1v3fvcr, .css-1y4p8pa, .css-1d0iiyk, .css-10trblm, .css-j7qwjs {
         color: white;
     }
 </style>
 """, unsafe_allow_html=True)
+
 
 logo = "Olympe Financial group.svg"  # Remplacez par le chemin d'accès à votre logo
 st.image(logo, width=200)  
