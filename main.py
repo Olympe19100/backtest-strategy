@@ -51,6 +51,10 @@ st.markdown("""
     .css-1d391kg {
         color: white;
     }
+    /* Changer la couleur du glossaire en blanc */
+    .css-1v3fvcr {
+        color: white;
+    }
 </style>
 """, unsafe_allow_html=True)
 
