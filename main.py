@@ -48,8 +48,8 @@ st.markdown("""
         margin-bottom: 30px;
     }
     /* Changer la couleur du texte dans la barre latérale en blanc */
-    .css-1d391kg {
-        color: white;
+    [data-testid="stSidebar"] * {
+        color: white !important;
     }
 </style>
 """, unsafe_allow_html=True)
@@ -318,5 +318,6 @@ st.markdown("""
     <p>Expertise financière et solutions patrimoniales sur mesure.</p>
 </div>
 """, unsafe_allow_html=True)
+
 
 
