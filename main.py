@@ -45,12 +45,11 @@ st.markdown("""
         margin-bottom: 30px;
     }
     /* Forcer la barre principale à occuper toute la largeur */
-.css-1d391kg, .css-1g6gooi {
-    max-width: 100% !important;
-    padding-left: 1rem;
-    padding-right: 1rem;
+    .css-1d391kg, .css-1g6gooi {
+        max-width: 100% !important;
+        padding-left: 1rem;
+        padding-right: 1rem;
     }
-    
     /* Styles spécifiques pour la barre latérale et le glossaire */
     [data-testid="stSidebar"] {
         background-color: #1E3A8A;
@@ -69,7 +68,6 @@ st.markdown("""
     }
 </style>
 """, unsafe_allow_html=True)
-
 
 logo = "Olympe Financial group.svg"  # Remplacez par le chemin d'accès à votre logo
 st.image(logo, width=200)  
@@ -181,14 +179,6 @@ with st.sidebar:
 # En-tête
 st.title("Olympe Financial Group - Façonnez Votre Avenir Financier")
 
-st.markdown("""
-<div class="highlight">
-    <h2>Expertise Financière à Votre Service</h2>
-   <p>Chez Olympe Financial Group, nous allons bien au-delà des solutions classiques. Nous nous appuyons sur un large réseau de partenariats stratégiques et collaborons avec des professionnels agréés et réglementés par l'AMF et enregistrés à l'ORIAS, pour vous fournir des conseils financiers personnalisés et en toute sécurité. 
-Grâce à nos algorithmes avancés, nous analysons toutes les sociétés cotées à travers le monde pour identifier les meilleures opportunités d'investissement. Notre engagement est simple : capturer les meilleures performances et garantir des résultats concrets et durables pour votre patrimoine.</p>
-
-""", unsafe_allow_html=True)
-
 # Section d'analyse de portefeuille
 st.header("Analyse de Portefeuille Personnalisée")
 st.write("Découvrez la puissance de notre analyse financière approfondie. Commencez dès maintenant !")
@@ -227,113 +217,27 @@ if st.button("Analyse du Portefeuille"):
                     with open(tmpfile.name, 'r') as f:
                         report_content = f.read()
 
-                # Afficher le rapport
-                st.components.v1.html(report_content, height=1000, scrolling=True)
+                # Afficher le rapport en utilisant toute la largeur
+                st.components.v1.html(
+                    f"<div style='width: 100%;'>{report_content}</div>", 
+                    height=1200, 
+                    scrolling=True
+                )
 
             except Exception as e:
                 st.warning("Nous préparons un rapport simplifié pour vous offrir les meilleures insights.")
-
-                # Créer et afficher un rapport simplifié
                 fig = create_simplified_report(weighted_returns, benchmark_returns.squeeze())
                 st.pyplot(fig)
 
         st.success("Analyse complétée avec succès ! Voici les résultats de votre portefeuille personnalisé.")
 
-# Section "Pourquoi Nous Choisir"
-st.header("Pourquoi Choisir Olympe Financial Group ?")
-col1, col2 = st.columns(2)
-with col1:
-    st.markdown("""
-    - **Expertise Financière Approfondie**: Nos experts utilisent des techniques d'analyse de pointe pour optimiser vos investissements.
-    - **Solutions Patrimoniales Sur Mesure**: Stratégies personnalisées adaptées à vos objectifs et votre profil de risque.
-    """)
-with col2:
-    st.markdown("""
-    - **Gestion Proactive des Risques**: Notre approche innovante a permis à nos clients de limiter leurs pertes, même dans des conditions de marché difficiles.
-    - **Optimisation Fiscale**: Nous identifions les opportunités pour maximiser la valeur de votre patrimoine.
-    """)
-
-# Nouvelle section sur les performances avancées
-st.markdown("""
-<div class="performance-section">
-    <h2>Nos Performances de Pointe en Gestion de Risque</h2>
-    <p>Découvrez comment nos algorithmes avancés ne se contentent pas seulement de choisir les meilleurs actifs, mais gèrent activement le risque pour optimiser vos rendements.</p>
-</div>
-""", unsafe_allow_html=True)
-
 # Charger et afficher le deuxième rapport HTML
 with open('rapport_performance (24).html', 'r') as f:
     risk_management_report = f.read()
 
-st.components.v1.html(risk_management_report, height=1000, scrolling=True)
-
-st.markdown("""
-<div class="highlight">
-    <h3>Ce que notre Gestion de Risque Avancée signifie pour vous :</h3>
-    <ul>
-        <li>Réduction significative de la volatilité du portefeuille</li>
-        <li>Protection accrue contre les baisses de marché</li>
-        <li>Optimisation du ratio rendement/risque</li>
-        <li>Adaptation dynamique aux conditions changeantes du marché</li>
-    </ul>
-    <p>En 2022, alors que de nombreux investisseurs subissaient des pertes importantes, nos clients ont bénéficié de notre gestion de risque proactive, limitant considérablement l'impact des turbulences du marché.</p>
-</div>
-""", unsafe_allow_html=True)
-
-# Témoignages
-st.header("Ce Que Disent Nos Clients")
-col1, col2 = st.columns(2)
-
-with col1:
-    st.markdown("""
-    > "Olympe Financial Group a su déployer des stratégies financières sophistiquées qui m'ont permis de maximiser mes rendements tout en maintenant un contrôle strict sur les risques. Leur expertise en analyse quantitative est un atout." - Antoine L., Gérant de Fonds
-    """)
-    st.markdown("""
-    > "En tant que chef d'une PME, j'avais besoin d'une gestion sur mesure pour mon entreprise et mon patrimoine personnel. L'équipe d'Olympe m'a offert un service clé en main, couvrant tous les aspects juridiques, financiers et fiscaux. Un vrai partenaire de confiance." - Karine P., Directrice d'une PME
-    """)
-    st.markdown("""
-    > "Grâce à Olympe, j'ai pu prendre des décisions éclairées en temps de marché incertain. Leur approche rigoureuse m'a permis d'éviter des pertes majeures et de saisir des opportunités rares." - Jérôme C., Consultant Indépendant
-    """)
-    st.markdown("""
-    > "Le soutien d'Olympe Financial Group dans la gestion de mes investissements a été remarquable. Leur capacité à ajuster la stratégie en fonction des fluctuations du marché tout en assurant un rendement optimal m'a impressionné." - Isabelle R., Particulière
-    """)
-    st.markdown("""
-    > "Olympe m'a accompagné dans la structuration de mon entreprise familiale. Leur approche patrimoniale m'a aidé à planifier efficacement la transmission de mes actifs tout en optimisant la fiscalité." - Étienne G., Entrepreneur Familial
-    """)
-
-with col2:
-    st.markdown("""
-    > "Ce qui distingue Olympe, c'est leur maîtrise des algorithmes d'analyse financière. En tant qu'investisseur privé, j'ai vu mes rendements nettement améliorés grâce à leur gestion quantitative et leur contrôle des risques." - Marie T., Investisseuse Privée
-    """)
-    st.markdown("""
-    > "Olympe a non seulement optimisé la gestion de mon patrimoine, mais ils m'ont aussi aidé à structurer mes actifs pour mieux protéger ma famille. Leur expertise juridique et patrimoniale est un véritable atout." - Fabien D., Cadre Supérieur
-    """)
-    st.markdown("""
-    > "Olympe Financial Group m'a donné une perspective nouvelle sur la gestion des risques. Ils ont su mettre en place une stratégie d'investissement solide qui a stabilisé mes rendements dans un contexte de marché turbulent." - Lucien M., Gérant de Portefeuille
-    """)
-    st.markdown("""
-    > "En tant que particulier avec un portefeuille modeste, je pensais ne pas avoir accès à des conseils de haute qualité. Olympe a su adapter ses services à mes besoins tout en me faisant bénéficier de leur expertise en analyse financière avancée." - Clara B., Particulière
-    """)
-    st.markdown("""
-    > "Olympe m'a accompagné dans le développement international de mon entreprise. Grâce à leur expertise combinée en gestion financière et en structuration juridique, j'ai pu franchir ce cap sereinement." - Samuel N., CEO d'une Start-up Technologique
-    """)
-
-# Appel à l'action
-st.markdown("""
-<div class="highlight">
-    <h3>Prêt à Sécuriser Votre Avenir Financier ?</h3>
-    <p>Ne laissez pas passer cette opportunité de transformer votre situation financière. Contactez-nous dès aujourd'hui pour une consultation gratuite et personnalisée.</p>
-</div>
-""", unsafe_allow_html=True)
-
-# Information de contact
-st.markdown("""
-<div class="contact-info">
-    <h3>Contactez Olympe Financial Group</h3>
-    <p>📞 Téléphone : +33 7 81 71 44 43</p>
-    <p>📧 Email : contact@olympemanagement.com</p>
-    <p>Expertise financière et solutions patrimoniales sur mesure.</p>
-</div>
-""", unsafe_allow_html=True)
-
-
+# Afficher le rapport avec une largeur maximale et hauteur augmentée
+st.components.v1.html(
+    f"<div style='width: 100%;'>{risk_management_report}</div>", 
+    height=1200, 
+    scrolling=True
+)
