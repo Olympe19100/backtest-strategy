@@ -7,9 +7,6 @@ from datetime import datetime, timedelta
 import quantstats as qs
 import tempfile
 
-# Configuration de la page Streamlit
-st.set_page_config(page_title="Olympe Financial Group - Votre Avenir Financier", layout="wide")
-
 # CSS personnalisé pour un design plus élégant
 st.markdown("""
 <style>
@@ -48,11 +45,7 @@ st.markdown("""
         margin-bottom: 30px;
     }
     /* Changer la couleur du texte dans la barre latérale en blanc */
-    .css-1d391kg {
-        color: white;
-    }
-    /* Changer la couleur du glossaire en blanc */
-    .css-1v3fvcr {
+    .css-1d391kg, .css-1v3fvcr, .css-1y4p8pa, .css-1d0iiyk {
         color: white;
     }
 </style>
