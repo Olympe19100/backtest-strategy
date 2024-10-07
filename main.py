@@ -44,6 +44,13 @@ st.markdown("""
         margin-top: 30px;
         margin-bottom: 30px;
     }
+    /* Forcer la barre principale à occuper toute la largeur */
+.css-1d391kg, .css-1g6gooi {
+    max-width: 100% !important;
+    padding-left: 1rem;
+    padding-right: 1rem;
+    }
+    
     /* Styles spécifiques pour la barre latérale et le glossaire */
     [data-testid="stSidebar"] {
         background-color: #1E3A8A;
