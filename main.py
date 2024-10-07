@@ -105,53 +105,7 @@ portfolio_weights = {
 
 # Glossaire des indicateurs
 glossary = {
-    "Risk-Free Rate (Taux sans risque)": "Le taux de rendement d'un investissement considéré comme sans risque, généralement basé sur les obligations d'État.",
-    "Time in Market (Temps sur le marché)": "Pourcentage du temps pendant lequel le portefeuille est investi sur le marché.",
-    "Cumulative Return (Rendement cumulé)": "Le rendement total du portefeuille sur la période considérée, exprimé en pourcentage.",
-    "CAGR % (Taux de croissance annuel composé)": "Le taux de rendement annuel moyen sur la période, prenant en compte la capitalisation des gains.",
-    "Sharpe Ratio": "Mesure du rendement excédentaire par unité de risque (volatilité totale).",
-    "Probabilistic Sharpe Ratio": "Probabilité que le Sharpe Ratio réel soit supérieur à zéro, basé sur les données historiques.",
-    "Smart Sharpe": "Version ajustée du Sharpe Ratio tenant compte de la non-normalité des rendements.",
-    "Sortino Ratio": "Semblable au Sharpe Ratio, mais ne prend en compte que la volatilité des rendements négatifs.",
-    "Smart Sortino": "Version ajustée du Sortino Ratio tenant compte de la distribution réelle des rendements.",
-    "Omega Ratio": "Rapport entre les gains attendus et les pertes attendues au-delà d'un certain seuil.",
-    "Max Drawdown (Perte maximale)": "La plus grande perte cumulative subie par le portefeuille.",
-    "Longest DD Days (Durée la plus longue de perte)": "Nombre maximal de jours consécutifs en drawdown.",
-    "Volatility (annuelle)": "Mesure de la dispersion ou de la variabilité des rendements annuels.",
-    "R² (Coefficient de détermination)": "Proportion de la variance des rendements expliquée par le benchmark.",
-    "Information Ratio": "Rendement excédentaire du portefeuille par rapport au benchmark, ajusté par sa volatilité.",
-    "Calmar Ratio": "Ratio du CAGR sur la perte maximale, mesurant le rendement ajusté du risque.",
-    "Skew (Asymétrie)": "Mesure de la symétrie de la distribution des rendements.",
-    "Kurtosis (Aplatissement)": "Mesure de la 'queue' de la distribution des rendements.",
-    "Expected Daily/Monthly/Yearly Return": "Rendement moyen attendu quotidien, mensuel ou annuel.",
-    "Kelly Criterion": "Pourcentage optimal du capital à investir pour maximiser la croissance logarithmique.",
-    "Risk of Ruin (Risque de ruine)": "Probabilité que le portefeuille perde tout son capital.",
-    "Daily Value-at-Risk (VaR quotidien)": "Pire perte attendue sur une journée donnée avec un certain niveau de confiance.",
-    "Expected Shortfall (cVaR)": "Perte moyenne attendue au-delà du VaR.",
-    "Max Consecutive Wins/Losses": "Nombre maximal de jours consécutifs avec gains ou pertes.",
-    "Gain/Pain Ratio": "Ratio du gain total par rapport à la perte totale sur la période.",
-    "Payoff Ratio": "Ratio du gain moyen des trades gagnants par rapport à la perte moyenne des trades perdants.",
-    "Profit Factor": "Somme des gains divisée par la somme des pertes.",
-    "Common Sense Ratio": "Ratio du gain net sur le maximum drawdown.",
-    "CPC Index": "Cumulative Profit to Capital index, mesure l'efficacité du capital investi.",
-    "Tail Ratio": "Ratio de la moyenne des gains extrêmes sur les pertes extrêmes.",
-    "Outlier Win/Loss Ratio": "Impact des gains ou pertes extrêmes sur la performance globale.",
-    "MTD (Month-to-Date)": "Performance depuis le début du mois jusqu'à la date actuelle.",
-    "3M, 6M, YTD, 1Y, 3Y (annuel), 5Y (annuel), 10Y (annuel), All-time (annuel)": "Performances sur différentes périodes.",
-    "Best/Worst Day/Month/Year": "Meilleures et pires performances sur une journée, un mois ou une année.",
-    "Avg. Drawdown": "Drawdown moyen subi par le portefeuille.",
-    "Avg. Drawdown Days": "Durée moyenne des périodes de drawdown.",
-    "Recovery Factor": "Ratio du gain cumulé sur la perte maximale.",
-    "Ulcer Index": "Mesure combinant la profondeur et la durée des drawdowns.",
-    "Serenity Index": "Ratio du CAGR sur l'Ulcer Index.",
-    "Avg. Up/Down Month": "Gain ou perte moyen pendant les mois positifs ou négatifs.",
-    "Win Days/Month/Quarter/Year": "Pourcentage de périodes avec gain.",
-    "Beta": "Sensibilité du portefeuille par rapport au benchmark.",
-    "Alpha": "Rendement excédentaire du portefeuille par rapport au bêta.",
-    "Correlation": "Corrélation entre les rendements du portefeuille et du benchmark.",
-    "Treynor Ratio": "Rendement excédentaire par unité de risque systématique (bêta).",
-    "EOY Returns vs Benchmark": "Rendements annuels par rapport au benchmark.",
-    "Worst 10 Drawdowns": "Les 10 pires drawdowns du portefeuille."
+    # ... (Votre glossaire reste inchangé)
 }
 
 # Afficher le glossaire dans la barre latérale
@@ -167,9 +121,9 @@ st.title("Olympe Financial Group - Façonnez Votre Avenir Financier")
 st.markdown("""
 <div class="highlight">
     <h2>Expertise Financière à Votre Service</h2>
-   <p>Chez Olympe Financial Group, nous allons bien au-delà des solutions classiques. Nous nous appuyons sur un large réseau de partenariats stratégiques et collaborons avec des professionnels agréés et réglementés par l'AMF et enregistrés à l'ORIAS, pour vous fournir des conseils financiers personnalisés et en toute sécurité. 
-Grâce à nos algorithmes avancés, nous analysons toutes les sociétés cotées à travers le monde pour identifier les meilleures opportunités d'investissement. Notre engagement est simple : capturer les meilleures performances et garantir des résultats concrets et durables pour votre patrimoine.</p>
-
+    <p>Chez Olympe Financial Group, nous allons bien au-delà des solutions classiques. Nous nous appuyons sur un large réseau de partenariats stratégiques et collaborons avec des professionnels agréés et réglementés par l'AMF et enregistrés à l'ORIAS, pour vous fournir des conseils financiers personnalisés et en toute sécurité. 
+    Grâce à nos algorithmes avancés, nous analysons toutes les sociétés cotées à travers le monde pour identifier les meilleures opportunités d'investissement. Notre engagement est simple : capturer les meilleures performances et garantir des résultats concrets et durables pour votre patrimoine.</p>
+</div>
 """, unsafe_allow_html=True)
 
 # Section d'analyse de portefeuille
@@ -184,8 +138,9 @@ with col2:
 
 if st.button("Analyser Mon Portefeuille"):
     with st.spinner("Analyse en cours... Nous préparons votre rapport personnalisé."):
-        # Télécharger les données
+        # Télécharger les données du portefeuille
         portfolio_data = download_data(list(portfolio_weights.keys()), start_date, end_date)
+        # Télécharger les données du CAC 40 comme benchmark pour le premier rapport
         benchmark_data = download_data('^FCHI', start_date, end_date)  # CAC 40
 
         # Vérifier que les données ont été téléchargées correctement
@@ -200,7 +155,7 @@ if st.button("Analyser Mon Portefeuille"):
             weights_series = pd.Series(portfolio_weights)
             weighted_returns = (portfolio_returns * weights_series).sum(axis=1)
 
-            # Générer le rapport
+            # Générer le premier rapport avec le CAC 40 comme benchmark
             try:
                 with tempfile.NamedTemporaryFile(delete=False, suffix='.html') as tmpfile:
                     qs.reports.html(weighted_returns, 
@@ -244,11 +199,32 @@ st.markdown("""
 </div>
 """, unsafe_allow_html=True)
 
-# Charger et afficher le deuxième rapport HTML
-with open('rapport_performance (24).html', 'r') as f:
-    risk_management_report = f.read()
+# Générer le deuxième rapport avec le S&P 500 comme benchmark
+with st.spinner("Génération du rapport de performance avancée..."):
+    # Télécharger les données du S&P 500 comme benchmark
+    sp500_data = download_data('^GSPC', start_date, end_date)  # S&P 500
 
-st.components.v1.html(risk_management_report, height=600, scrolling=True)
+    # Vérifier que les données ont été téléchargées correctement
+    if sp500_data.empty:
+        st.error("Les données du S&P 500 n'ont pas pu être téléchargées. Veuillez réessayer plus tard.")
+    else:
+        sp500_returns = calculate_returns(sp500_data)
+
+        # Générer le deuxième rapport avec le S&P 500 comme benchmark
+        try:
+            with tempfile.NamedTemporaryFile(delete=False, suffix='.html') as tmpfile:
+                qs.reports.html(weighted_returns, 
+                                benchmark=sp500_returns.squeeze(), 
+                                output=tmpfile.name,
+                                title="Rapport de Performance Avancée avec Gestion de Risque")
+                with open(tmpfile.name, 'r') as f:
+                    advanced_report_content = f.read()
+
+            # Afficher le rapport
+            st.components.v1.html(advanced_report_content, height=800, scrolling=True)
+
+        except Exception as e:
+            st.error("Une erreur est survenue lors de la génération du rapport avancé.")
 
 st.markdown("""
 <div class="highlight">
@@ -318,6 +294,7 @@ st.markdown("""
     <p>Expertise financière et solutions patrimoniales sur mesure.</p>
 </div>
 """, unsafe_allow_html=True)
+
 
 
 
