@@ -146,87 +146,72 @@ if st.button("Analyser Mon Portefeuille"):
                 with open(tmpfile.name, 'r') as f:
                     report_content = f.read()
             
-            # Afficher les graphiques et le glossaire côte à côte
-            col_graphs, col_glossary = st.columns([3, 1])
-            with col_graphs:
-                st.components.v1.html(report_content, height=800, scrolling=True)
-            with col_glossary:
-                st.header("Glossaire des Indicateurs")
-                glossary = {
-                    "Risk-Free Rate (Taux sans risque)": "Le taux de rendement d'un investissement considéré comme sans risque, généralement basé sur les obligations d'État. Ici, il est à 0 %, indiquant que le rendement de référence sans risque est nul.",
-                    "Time in Market (Temps sur le marché)": "Pourcentage du temps pendant lequel le portefeuille est investi sur le marché. Un taux de 100 % signifie que le portefeuille est toujours investi.",
-                    "Cumulative Return (Rendement cumulé)": "Le rendement total du portefeuille sur la période considérée, exprimé en pourcentage.",
-                    "CAGR % (Taux de croissance annuel composé)": "Le taux de rendement annuel moyen sur la période, prenant en compte la capitalisation des gains.",
-                    "Sharpe Ratio": "Mesure du rendement excédentaire par unité de risque (volatilité totale). Un ratio plus élevé indique un meilleur rendement ajusté du risque.",
-                    "Probabilistic Sharpe Ratio": "Probabilité que le Sharpe Ratio réel soit supérieur à zéro, basé sur les données historiques.",
-                    "Smart Sharpe": "Une version ajustée du Sharpe Ratio qui prend en compte la non-normalité des rendements (asymétrie et kurtosis).",
-                    "Sortino Ratio": "Semblable au Sharpe Ratio, mais ne prend en compte que la volatilité des rendements négatifs (risque de baisse).",
-                    "Smart Sortino": "Version ajustée du Sortino Ratio, tenant compte de la distribution réelle des rendements.",
-                    "Omega Ratio": "Rapport entre les gains attendus et les pertes attendues au-delà d'un certain seuil de rendement minimal.",
-                    "Max Drawdown (Perte maximale)": "La plus grande perte cumulative subie par le portefeuille, mesurée du pic le plus élevé au creux le plus bas.",
-                    "Longest DD Days (Durée la plus longue de perte)": "Nombre maximal de jours consécutifs pendant lesquels le portefeuille est resté en drawdown.",
-                    "Volatility (annuelle)": "Mesure de la dispersion ou de la variabilité des rendements annuels du portefeuille.",
-                    "R² (Coefficient de détermination)": "Indique la proportion de la variance des rendements du portefeuille expliquée par le benchmark. Une valeur de 0,25 signifie que 25 % de la variance est expliquée.",
-                    "Information Ratio": "Mesure du rendement excédentaire du portefeuille par rapport au benchmark, ajusté par la volatilité de ce rendement excédentaire.",
-                    "Calmar Ratio": "Ratio du CAGR sur la perte maximale. Il mesure le rendement ajusté du risque en se concentrant sur les drawdowns.",
-                    "Skew (Asymétrie)": "Mesure de la symétrie de la distribution des rendements. Une valeur négative indique une distribution étalée vers la gauche (pertes extrêmes plus probables).",
-                    "Kurtosis (Aplatissement)": "Mesure de la 'queue' de la distribution des rendements. Une valeur élevée indique une probabilité accrue d'événements extrêmes.",
-                    "Expected Daily/Monthly/Yearly Return": "Rendement moyen attendu quotidien, mensuel ou annuel.",
-                    "Kelly Criterion": "Pourcentage optimal du capital à investir pour maximiser la croissance logarithmique du capital, basé sur les rendements historiques.",
-                    "Risk of Ruin (Risque de ruine)": "Probabilité que le portefeuille perde tout son capital ou descende en dessous d'un seuil critique.",
-                    "Daily Value-at-Risk (VaR quotidien)": "Pire perte attendue sur une journée donnée, avec un certain niveau de confiance (généralement 95 %).",
-                    "Expected Shortfall (cVaR)": "Perte moyenne attendue au-delà du VaR, c'est-à-dire en cas de dépassement du VaR.",
-                    "Max Consecutive Wins/Losses": "Nombre maximal de jours consécutifs avec des gains ou des pertes.",
-                    "Gain/Pain Ratio": "Ratio du gain total par rapport à la perte totale sur la période considérée.",
-                    "Payoff Ratio": "Ratio du gain moyen des trades gagnants par rapport à la perte moyenne des trades perdants.",
-                    "Profit Factor": "Somme des gains divisée par la somme des pertes. Un ratio supérieur à 1 indique un système profitable.",
-                    "Common Sense Ratio": "Ratio du gain net sur le maximum drawdown, fournissant une mesure du rendement ajusté du risque.",
-                    "CPC Index": "Cumulative Profit to Capital index, mesure l'efficacité du capital investi dans le temps.",
-                    "Tail Ratio": "Ratio de la moyenne des gains extrêmes par rapport à la moyenne des pertes extrêmes.",
-                    "Outlier Win/Loss Ratio": "Mesure de l'impact des gains ou pertes extrêmes sur la performance globale.",
-                    "MTD (Month-to-Date)": "Performance depuis le début du mois jusqu'à la date actuelle.",
-                    "3M, 6M, YTD, 1Y, 3Y (annuel), 5Y (annuel), 10Y (annuel), All-time (annuel)": "Performances sur différentes périodes, certaines annualisées pour permettre une comparaison cohérente.",
-                    "Best/Worst Day/Month/Year": "Les meilleures et pires performances réalisées sur une journée, un mois ou une année.",
-                    "Avg. Drawdown": "Drawdown moyen subi par le portefeuille au cours de la période.",
-                    "Avg. Drawdown Days": "Durée moyenne des périodes de drawdown.",
-                    "Recovery Factor": "Ratio du gain cumulé sur la perte maximale. Un ratio plus élevé indique une meilleure capacité à récupérer après des pertes.",
-                    "Ulcer Index": "Mesure combinant la profondeur et la durée des drawdowns, reflétant le 'stress' d'un investissement.",
-                    "Serenity Index": "Ratio du CAGR sur l'Ulcer Index, fournissant une mesure du rendement ajusté du stress.",
-                    "Avg. Up/Down Month": "Gain ou perte moyen pendant les mois positifs ou négatifs.",
-                    "Win Days/Month/Quarter/Year": "Pourcentage de jours, mois, trimestres ou années où le portefeuille a enregistré un gain.",
-                    "Beta": "Mesure de la sensibilité du portefeuille par rapport au benchmark. Un bêta de 0,59 signifie que le portefeuille est moins volatil que le marché.",
-                    "Alpha": "Rendement excédentaire du portefeuille par rapport à ce qui est attendu compte tenu de son bêta.",
-                    "Correlation": "Corrélation entre les rendements du portefeuille et ceux du benchmark, exprimée en pourcentage.",
-                    "Treynor Ratio": "Mesure du rendement excédentaire par unité de risque systématique (bêta), utile pour comparer des portefeuilles avec des bêtas différents.",
-                    "EOY Returns vs Benchmark": "Rendements annuels par rapport au benchmark, permettant de comparer la performance du portefeuille à celle du marché.",
-                    "Worst 10 Drawdowns": "Les 10 pires drawdowns (baisses maximales), montrant les périodes les plus difficiles pour le portefeuille."
-                }
-                for term, definition in glossary.items():
-                    st.subheader(term)
-                    st.write(definition)
+            # Afficher les graphiques
+            st.components.v1.html(report_content, height=800, scrolling=True)
         
         except Exception as e:
             st.warning("Nous préparons un rapport simplifié pour vous offrir les meilleures insights.")
             
             # Créer et afficher un rapport simplifié
             fig = create_simplified_report(weighted_returns, benchmark_returns.squeeze())
-            
-            # Afficher les graphiques et le glossaire côte à côte
-            col_graphs, col_glossary = st.columns([3, 1])
-            with col_graphs:
-                st.pyplot(fig)
-            with col_glossary:
-                st.header("Glossaire des Indicateurs")
-                glossary = {
-                    # Inclure le même glossaire que précédemment
-                    "Risk-Free Rate (Taux sans risque)": "Le taux de rendement d'un investissement considéré comme sans risque, généralement basé sur les obligations d'État. Ici, il est à 0 %, indiquant que le rendement de référence sans risque est nul.",
-                    # ... (Ajoutez toutes les définitions)
-                }
-                for term, definition in glossary.items():
-                    st.subheader(term)
-                    st.write(definition)
+            st.pyplot(fig)
 
     st.success("Analyse complétée avec succès ! Voici les résultats de votre portefeuille personnalisé.")
+
+    # Afficher le glossaire dans un menu déroulant
+    with st.expander("📘 Glossaire des Indicateurs"):
+        glossary = {
+            "Risk-Free Rate (Taux sans risque)": "Le taux de rendement d'un investissement considéré comme sans risque, généralement basé sur les obligations d'État. Ici, il est à 0 %, indiquant que le rendement de référence sans risque est nul.",
+            "Time in Market (Temps sur le marché)": "Pourcentage du temps pendant lequel le portefeuille est investi sur le marché. Un taux de 100 % signifie que le portefeuille est toujours investi.",
+            "Cumulative Return (Rendement cumulé)": "Le rendement total du portefeuille sur la période considérée, exprimé en pourcentage.",
+            "CAGR % (Taux de croissance annuel composé)": "Le taux de rendement annuel moyen sur la période, prenant en compte la capitalisation des gains.",
+            "Sharpe Ratio": "Mesure du rendement excédentaire par unité de risque (volatilité totale). Un ratio plus élevé indique un meilleur rendement ajusté du risque.",
+            "Probabilistic Sharpe Ratio": "Probabilité que le Sharpe Ratio réel soit supérieur à zéro, basé sur les données historiques.",
+            "Smart Sharpe": "Une version ajustée du Sharpe Ratio qui prend en compte la non-normalité des rendements (asymétrie et kurtosis).",
+            "Sortino Ratio": "Semblable au Sharpe Ratio, mais ne prend en compte que la volatilité des rendements négatifs (risque de baisse).",
+            "Smart Sortino": "Version ajustée du Sortino Ratio, tenant compte de la distribution réelle des rendements.",
+            "Omega Ratio": "Rapport entre les gains attendus et les pertes attendues au-delà d'un certain seuil de rendement minimal.",
+            "Max Drawdown (Perte maximale)": "La plus grande perte cumulative subie par le portefeuille, mesurée du pic le plus élevé au creux le plus bas.",
+            "Longest DD Days (Durée la plus longue de perte)": "Nombre maximal de jours consécutifs pendant lesquels le portefeuille est resté en drawdown.",
+            "Volatility (annuelle)": "Mesure de la dispersion ou de la variabilité des rendements annuels du portefeuille.",
+            "R² (Coefficient de détermination)": "Indique la proportion de la variance des rendements du portefeuille expliquée par le benchmark. Une valeur de 0,25 signifie que 25 % de la variance est expliquée.",
+            "Information Ratio": "Mesure du rendement excédentaire du portefeuille par rapport au benchmark, ajusté par la volatilité de ce rendement excédentaire.",
+            "Calmar Ratio": "Ratio du CAGR sur la perte maximale. Il mesure le rendement ajusté du risque en se concentrant sur les drawdowns.",
+            "Skew (Asymétrie)": "Mesure de la symétrie de la distribution des rendements. Une valeur négative indique une distribution étalée vers la gauche (pertes extrêmes plus probables).",
+            "Kurtosis (Aplatissement)": "Mesure de la 'queue' de la distribution des rendements. Une valeur élevée indique une probabilité accrue d'événements extrêmes.",
+            "Expected Daily/Monthly/Yearly Return": "Rendement moyen attendu quotidien, mensuel ou annuel.",
+            "Kelly Criterion": "Pourcentage optimal du capital à investir pour maximiser la croissance logarithmique du capital, basé sur les rendements historiques.",
+            "Risk of Ruin (Risque de ruine)": "Probabilité que le portefeuille perde tout son capital ou descende en dessous d'un seuil critique.",
+            "Daily Value-at-Risk (VaR quotidien)": "Pire perte attendue sur une journée donnée, avec un certain niveau de confiance (généralement 95 %).",
+            "Expected Shortfall (cVaR)": "Perte moyenne attendue au-delà du VaR, c'est-à-dire en cas de dépassement du VaR.",
+            "Max Consecutive Wins/Losses": "Nombre maximal de jours consécutifs avec des gains ou des pertes.",
+            "Gain/Pain Ratio": "Ratio du gain total par rapport à la perte totale sur la période considérée.",
+            "Payoff Ratio": "Ratio du gain moyen des trades gagnants par rapport à la perte moyenne des trades perdants.",
+            "Profit Factor": "Somme des gains divisée par la somme des pertes. Un ratio supérieur à 1 indique un système profitable.",
+            "Common Sense Ratio": "Ratio du gain net sur le maximum drawdown, fournissant une mesure du rendement ajusté du risque.",
+            "CPC Index": "Cumulative Profit to Capital index, mesure l'efficacité du capital investi dans le temps.",
+            "Tail Ratio": "Ratio de la moyenne des gains extrêmes par rapport à la moyenne des pertes extrêmes.",
+            "Outlier Win/Loss Ratio": "Mesure de l'impact des gains ou pertes extrêmes sur la performance globale.",
+            "MTD (Month-to-Date)": "Performance depuis le début du mois jusqu'à la date actuelle.",
+            "3M, 6M, YTD, 1Y, 3Y (annuel), 5Y (annuel), 10Y (annuel), All-time (annuel)": "Performances sur différentes périodes, certaines annualisées pour permettre une comparaison cohérente.",
+            "Best/Worst Day/Month/Year": "Les meilleures et pires performances réalisées sur une journée, un mois ou une année.",
+            "Avg. Drawdown": "Drawdown moyen subi par le portefeuille au cours de la période.",
+            "Avg. Drawdown Days": "Durée moyenne des périodes de drawdown.",
+            "Recovery Factor": "Ratio du gain cumulé sur la perte maximale. Un ratio plus élevé indique une meilleure capacité à récupérer après des pertes.",
+            "Ulcer Index": "Mesure combinant la profondeur et la durée des drawdowns, reflétant le 'stress' d'un investissement.",
+            "Serenity Index": "Ratio du CAGR sur l'Ulcer Index, fournissant une mesure du rendement ajusté du stress.",
+            "Avg. Up/Down Month": "Gain ou perte moyen pendant les mois positifs ou négatifs.",
+            "Win Days/Month/Quarter/Year": "Pourcentage de jours, mois, trimestres ou années où le portefeuille a enregistré un gain.",
+            "Beta": "Mesure de la sensibilité du portefeuille par rapport au benchmark. Un bêta de 0,59 signifie que le portefeuille est moins volatil que le marché.",
+            "Alpha": "Rendement excédentaire du portefeuille par rapport à ce qui est attendu compte tenu de son bêta.",
+            "Correlation": "Corrélation entre les rendements du portefeuille et ceux du benchmark, exprimée en pourcentage.",
+            "Treynor Ratio": "Mesure du rendement excédentaire par unité de risque systématique (bêta), utile pour comparer des portefeuilles avec des bêtas différents.",
+            "EOY Returns vs Benchmark": "Rendements annuels par rapport au benchmark, permettant de comparer la performance du portefeuille à celle du marché.",
+            "Worst 10 Drawdowns": "Les 10 pires drawdowns (baisses maximales), montrant les périodes les plus difficiles pour le portefeuille."
+        }
+        for term, definition in glossary.items():
+            st.subheader(term)
+            st.write(definition)
 
 # Section "Pourquoi Nous Choisir"
 st.header("Pourquoi Choisir Olympe Financial Group ?")
