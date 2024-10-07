@@ -10,7 +10,7 @@ import tempfile
 # Configuration de la page Streamlit
 st.set_page_config(page_title="Olympe Financial Group - Votre Avenir Financier", layout="wide")
 
-# CSS personnalisé pour un design plus élégant et pour le glossaire
+# CSS personnalisé pour un design plus élégant
 st.markdown("""
 <style>
     .stApp {
@@ -46,16 +46,6 @@ st.markdown("""
         border-radius: 5px;
         margin-top: 30px;
         margin-bottom: 30px;
-    }
-    /* Style pour le glossaire */
-    .glossary-container {
-        height: 800px;
-        overflow-y: scroll;
-        padding-right: 15px;
-    }
-    .glossary-term {
-        font-weight: bold;
-        margin-top: 10px;
     }
 </style>
 """, unsafe_allow_html=True)
@@ -163,7 +153,7 @@ if st.button("Analyser Mon Portefeuille"):
                 with col_graphs:
                     st.components.v1.html(report_content, height=800, scrolling=True)
                 with col_glossary:
-                    st.markdown("<h2>Glossaire des Indicateurs</h2>", unsafe_allow_html=True)
+                    st.header("Glossaire des Indicateurs")
                     # Glossaire des indicateurs
                     glossary = {
                         "Risk-Free Rate (Taux sans risque)": "Le taux de rendement d'un investissement considéré comme sans risque, généralement basé sur les obligations d'État.",
@@ -214,12 +204,9 @@ if st.button("Analyser Mon Portefeuille"):
                         "EOY Returns vs Benchmark": "Rendements annuels par rapport au benchmark.",
                         "Worst 10 Drawdowns": "Les 10 pires drawdowns du portefeuille."
                     }
-                    # Créer un conteneur scrollable pour le glossaire
-                    st.markdown('<div class="glossary-container">', unsafe_allow_html=True)
                     for term, definition in glossary.items():
-                        st.markdown(f'<p class="glossary-term">{term}</p>', unsafe_allow_html=True)
+                        st.subheader(term)
                         st.write(definition)
-                    st.markdown('</div>', unsafe_allow_html=True)
 
             except Exception as e:
                 st.warning("Nous préparons un rapport simplifié pour vous offrir les meilleures insights.")
@@ -232,15 +219,13 @@ if st.button("Analyser Mon Portefeuille"):
                 with col_graphs:
                     st.pyplot(fig)
                 with col_glossary:
-                    st.markdown("<h2>Glossaire des Indicateurs</h2>", unsafe_allow_html=True)
+                    st.header("Glossaire des Indicateurs")
                     # Utiliser le même glossaire que ci-dessus
-                    st.markdown('<div class="glossary-container">', unsafe_allow_html=True)
                     for term, definition in glossary.items():
-                        st.markdown(f'<p class="glossary-term">{term}</p>', unsafe_allow_html=True)
+                        st.subheader(term)
                         st.write(definition)
-                    st.markdown('</div>', unsafe_allow_html=True)
 
-            st.success("Analyse complétée avec succès ! Voici les résultats de votre portefeuille personnalisé.")
+        st.success("Analyse complétée avec succès ! Voici les résultats de votre portefeuille personnalisé.")
 
 # Section "Pourquoi Nous Choisir"
 st.header("Pourquoi Choisir Olympe Financial Group ?")
