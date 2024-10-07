@@ -7,6 +7,7 @@ from datetime import datetime, timedelta
 import quantstats as qs
 import tempfile
 
+# CSS personnalisé pour un design plus élégant
 st.markdown("""
 <style>
     .stApp {
@@ -43,12 +44,20 @@ st.markdown("""
         margin-top: 30px;
         margin-bottom: 30px;
     }
-    /* Changer la couleur du texte dans la barre latérale en blanc */
-    .css-1d391kg, .css-1v3fvcr, .css-1y4p8pa, .css-1d0iiyk, .css-10trblm, .css-j7qwjs {
-        color: white;
+    /* Styles spécifiques pour la barre latérale et le glossaire */
+    [data-testid="stSidebar"] {
+        background-color: #1E3A8A;
     }
-    /* Nouveau style pour le texte du glossaire */
-    .sidebar .stMarkdown {
+    [data-testid="stSidebar"] .stMarkdown,
+    [data-testid="stSidebar"] .stMarkdown p,
+    [data-testid="stSidebar"] .stMarkdown h1,
+    [data-testid="stSidebar"] .stMarkdown h2,
+    [data-testid="stSidebar"] .stMarkdown h3,
+    [data-testid="stSidebar"] .stMarkdown h4 {
+        color: white !important;
+    }
+    /* Assurer que tous les éléments de texte dans la barre latérale sont blancs */
+    [data-testid="stSidebar"] * {
         color: white;
     }
 </style>
