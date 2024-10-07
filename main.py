@@ -221,7 +221,7 @@ if st.button("Analyse du Portefeuille"):
                         report_content = f.read()
 
                 # Afficher le rapport
-                st.components.v1.html(report_content, height=800, scrolling=True)
+                st.components.v1.html(report_content, height=1000, scrolling=True)
 
             except Exception as e:
                 st.warning("Nous préparons un rapport simplifié pour vous offrir les meilleures insights.")
@@ -258,7 +258,7 @@ st.markdown("""
 with open('rapport_performance (24).html', 'r') as f:
     risk_management_report = f.read()
 
-st.components.v1.html(risk_management_report, height=600, scrolling=True)
+st.components.v1.html(risk_management_report, height=1000, scrolling=True)
 
 st.markdown("""
 <div class="highlight">
