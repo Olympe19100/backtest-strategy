@@ -182,7 +182,7 @@ with col1:
 with col2:
     end_date = st.date_input("Date de fin", value=datetime(2024, 9, 30))
 
-if st.button("Analyser Mon Portefeuille"):
+if st.button("Analyse du Portefeuille"):
     with st.spinner("Analyse en cours... Nous préparons votre rapport personnalisé."):
         # Télécharger les données
         portfolio_data = download_data(list(portfolio_weights.keys()), start_date, end_date)
@@ -206,7 +206,7 @@ if st.button("Analyser Mon Portefeuille"):
                     qs.reports.html(weighted_returns, 
                                     benchmark=benchmark_returns.squeeze(), 
                                     output=tmpfile.name,
-                                    title="Rapport d'analyse du portefeuille Olympe")
+                                    title="Rapport d'analyse du portefeuille Olympe Financial Group (bleu) Face au Cac40 (jaune)")
                     with open(tmpfile.name, 'r') as f:
                         report_content = f.read()
 
