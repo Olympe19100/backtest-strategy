@@ -7,8 +7,6 @@ from datetime import datetime, timedelta
 import quantstats as qs
 import tempfile
 
-# CSS personnalisé pour un design plus élégant
-# CSS personnalisé pour un design plus élégant
 st.markdown("""
 <style>
     .stApp {
@@ -47,6 +45,10 @@ st.markdown("""
     }
     /* Changer la couleur du texte dans la barre latérale en blanc */
     .css-1d391kg, .css-1v3fvcr, .css-1y4p8pa, .css-1d0iiyk, .css-10trblm, .css-j7qwjs {
+        color: white;
+    }
+    /* Nouveau style pour le texte du glossaire */
+    .sidebar .stMarkdown {
         color: white;
     }
 </style>
